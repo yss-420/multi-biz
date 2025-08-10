@@ -9,8 +9,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function SettingsPage() {
-  const { settings, currentBusiness } = useData();
-  const { user, changePassword } = useAuth();
+  const { settings, currentBusiness, businesses, updateBusiness, removeBusiness } = useData();
+  const { user, changePassword, requirePasswordCheck } = useAuth();
   const { toast } = useToast();
   const [days, setDays] = useState<number[]>(settings.reminderDays);
   

@@ -64,6 +64,8 @@ export type DataState = {
 type DataContextValue = DataState & {
   selectBusiness: (id: ID) => void;
   addBusiness: (name: string, color?: string) => Business;
+  updateBusiness: (id: ID, patch: Partial<Business>) => void;
+  removeBusiness: (id: ID) => void;
   addSubscription: (s: Omit<Subscription, "id">) => void;
   updateSubscription: (s: Subscription) => void;
   removeSubscription: (id: ID) => void;
@@ -76,6 +78,7 @@ type DataContextValue = DataState & {
   addTeamMember: (m: Omit<TeamMember, "id" | "status">) => void;
   assignMemberToBusinesses: (memberId: ID, businessIds: ID[]) => void;
   updateTeamMember: (memberId: ID, patch: Partial<TeamMember>) => void;
+  removeTeamMember: (memberId: ID) => void;
   currentBusiness: Business | undefined;
   subsForSelected: Subscription[];
   tasksForSelected: Task[];
@@ -159,11 +162,24 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const api = useMemo<DataContextValue>(() => {
     const selectBusiness = (id: ID) => setState((s) => ({ ...s, selectedBusinessId: id }));
 
-    const addBusiness = (name: string, color?: string): Business => {
-      const b: Business = { id: uid(), name, color };
-      setState((st) => ({ ...st, businesses: [...st.businesses, b] }));
-      return b;
-    };
+const addBusiness = (name: string, color?: string): Business => {
+  const b: Business = { id: uid(), name, color };
+  setState((st) => ({ ...st, businesses: [...st.businesses, b] }));
+  return b;
+};
+
+const updateBusiness = (id: ID, patch: Partial<Business>) =>
+  setState((st) => ({
+    ...st,
+    businesses: st.businesses.map((b) => (b.id === id ? { ...b, ...patch } : b)),
+  }));
+
+const removeBusiness = (id: ID) =>
+  setState((st) => {
+    const businesses = st.businesses.filter((b) => b.id !== id);
+    const selectedBusinessId = st.selectedBusinessId === id ? (businesses[0]?.id || "") : st.selectedBusinessId;
+    return { ...st, businesses, selectedBusinessId };
+  });
 
     const addSubscription = (s: Omit<Subscription, "id">) =>
       setState((st) => ({ ...st, subscriptions: [{ id: uid(), ...s }, ...st.subscriptions] }));
@@ -209,11 +225,17 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         team: st.team.map((m) => (m.id === memberId ? { ...m, assignedBusinessIds: businessIds } : m)),
       }));
 
-    const updateTeamMember = (memberId: ID, patch: Partial<TeamMember>) =>
-      setState((st) => ({
-        ...st,
-        team: st.team.map((m) => (m.id === memberId ? { ...m, ...patch } : m)),
-      }));
+const updateTeamMember = (memberId: ID, patch: Partial<TeamMember>) =>
+  setState((st) => ({
+    ...st,
+    team: st.team.map((m) => (m.id === memberId ? { ...m, ...patch } : m)),
+  }));
+
+const removeTeamMember = (memberId: ID) =>
+  setState((st) => ({
+    ...st,
+    team: st.team.filter((m) => m.id !== memberId),
+  }));
 
     const currentBusiness = state.businesses.find((b) => b.id === state.selectedBusinessId);
 
@@ -230,27 +252,30 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .slice(0, 5);
     };
 
-    return {
-      ...state,
-      selectBusiness,
-      addBusiness,
-      addSubscription,
-      updateSubscription,
-      removeSubscription,
-      addTask,
-      toggleTask,
-      updateTask,
-      removeTask,
-      addApiKey,
-      removeApiKey,
-      addTeamMember,
-      assignMemberToBusinesses,
-      updateTeamMember,
-      currentBusiness,
-      subsForSelected,
-      tasksForSelected,
-      upcomingRenewals,
-    };
+return {
+  ...state,
+  selectBusiness,
+  addBusiness,
+  updateBusiness,
+  removeBusiness,
+  addSubscription,
+  updateSubscription,
+  removeSubscription,
+  addTask,
+  toggleTask,
+  updateTask,
+  removeTask,
+  addApiKey,
+  removeApiKey,
+  addTeamMember,
+  assignMemberToBusinesses,
+  updateTeamMember,
+  removeTeamMember,
+  currentBusiness,
+  subsForSelected,
+  tasksForSelected,
+  upcomingRenewals,
+};
   }, [state]);
 
   return <DataContext.Provider value={api}>{children}</DataContext.Provider>;

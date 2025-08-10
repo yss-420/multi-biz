@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RequireOwner } from "@/context/AuthContext";
+import { RequireOwner, useAuth } from "@/context/AuthContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Pencil } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 
 function TeamContent() {
-  const { team, businesses, addTeamMember, assignMemberToBusinesses, currentBusiness, updateTeamMember } = useData();
+  const { team, businesses, addTeamMember, assignMemberToBusinesses, currentBusiness, updateTeamMember, removeTeamMember } = useData();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
@@ -32,20 +32,34 @@ function TeamContent() {
     "support",
   ];
   const rolesByDept: Record<string, string[]> = {
-    leadership: ["CEO", "Co-Founder", "CTO", "COO", "CFO", "CPO"],
-    product: ["Product Manager", "Product Owner", "Business Analyst"],
-    engineering: ["Frontend Engineer", "Backend Engineer", "Fullstack Engineer", "Mobile Engineer", "QA Engineer", "SRE", "DevOps", "Data Engineer", "ML Engineer"],
-    design: ["Product Designer", "UX Researcher", "Brand Designer", "Graphic Designer", "UX Writer"],
-    data: ["Data Analyst", "Data Scientist", "BI Analyst"],
-    marketing: ["Marketing Manager", "Content Marketer", "SEO Specialist", "Growth Marketer", "Performance Marketer", "Social Media Manager"],
-    sales: ["SDR", "Account Executive", "Account Manager", "Sales Manager"],
-    "customer-success": ["Customer Success Manager", "Onboarding Specialist"],
+    leadership: ["CEO", "Co-Founder", "CTO", "COO", "CFO", "CPO", "Chief of Staff", "VP of Engineering", "VP of Product"],
+    product: ["Product Manager", "Sr. Product Manager", "Product Owner", "Business Analyst"],
+    engineering: [
+      "Frontend Engineer",
+      "Backend Engineer",
+      "Full-Stack Engineer",
+      "Mobile Engineer",
+      "QA Engineer",
+      "QA Lead",
+      "SRE",
+      "DevOps Engineer",
+      "Security Engineer",
+      "Staff Engineer",
+      "Principal Engineer",
+      "Data Engineer",
+      "ML Engineer",
+    ],
+    design: ["Product Designer", "UX Researcher", "UX Writer", "Brand Designer", "Graphic Designer", "Design Manager"],
+    data: ["Data Analyst", "Data Scientist", "BI Analyst", "Analytics Engineer"],
+    marketing: ["Marketing Manager", "Content Marketer", "SEO Specialist", "Growth Marketer", "Performance Marketer", "Social Media Manager", "Marketing Ops"],
+    sales: ["SDR", "Account Executive", "Account Manager", "Sales Manager", "Sales Ops"],
+    "customer-success": ["Customer Success Manager", "Onboarding Specialist", "Support Engineer"],
     operations: ["Operations Manager", "Project Manager", "Program Manager"],
-    finance: ["Finance Manager", "Accountant", "Controller"],
+    finance: ["Finance Manager", "Accountant", "Controller", "FP&A Analyst"],
     hr: ["HR Manager", "Recruiter", "People Ops"],
     legal: ["Legal Counsel", "Compliance Officer"],
-    "it-security": ["IT Admin", "Security Engineer"],
-    partnerships: ["Partnerships Manager", "BD Manager"],
+    "it-security": ["IT Admin", "Security Engineer", "Security Analyst"],
+    partnerships: ["Partnerships Manager", "Business Development Manager"],
     support: ["Support Specialist", "Support Engineer"],
   };
   const [department, setDepartment] = useState<string>(departments[0]);
@@ -54,6 +68,8 @@ function TeamContent() {
   useEffect(() => { setRole((rolesByDept[department] ?? [""])[0]); }, [department]);
   const [edit, setEdit] = useState<TeamMember | null>(null);
   const [editOpen, setEditOpen] = useState(false);
+  const { requirePasswordCheck } = useAuth();
+  const toTitle = (s: string) => s.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
 
   useEffect(() => {
     document.title = `Team – ${currentBusiness?.name ?? "MultiBiz"}`;
@@ -92,7 +108,7 @@ function TeamContent() {
               </SelectTrigger>
               <SelectContent>
                 {departments.map((d) => (
-                  <SelectItem key={d} value={d}>{d}</SelectItem>
+                  <SelectItem key={d} value={d}>{toTitle(d)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -131,9 +147,24 @@ function TeamContent() {
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
         {team.map((m) => (
           <Card key={m.id} className="p-4 space-y-3">
-            <div className="font-semibold">{m.name}</div>
+            <div className="flex items-center justify-between">
+              <div className="font-semibold">{m.name}</div>
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="icon" aria-label="Edit" onClick={() => { setEdit(m); setEditOpen(true); }}>
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" aria-label="Delete" onClick={() => {
+                  const pwd = prompt("Enter owner password to delete member");
+                  if (!pwd) return;
+                  if (!requirePasswordCheck(pwd)) return;
+                  removeTeamMember(m.id);
+                }}>
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </div>
+            </div>
             <div className="text-sm text-muted-foreground">{m.email}</div>
-            <div className="text-sm">Role: {m.role || "—"} · Dept: {m.department || "—"}</div>
+            <div className="text-sm">Role: {m.role || "—"} · Dept: {m.department ? toTitle(m.department) : "—"}</div>
             <div className="text-sm">Assigned: {m.assignedBusinessIds.map((id) => businesses.find((b) => b.id === id)?.name).join(", ") || "—"}</div>
             <div className="grid gap-1">
               <Label>Change Assignment</Label>
@@ -152,6 +183,56 @@ function TeamContent() {
           </Card>
         ))}
       </div>
+
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Member</DialogTitle>
+          </DialogHeader>
+          {edit && (
+            <div className="grid md:grid-cols-2 gap-3">
+              <div className="grid gap-1">
+                <Label>Name</Label>
+                <Input value={edit.name} onChange={(e) => setEdit({ ...edit!, name: e.target.value })} />
+              </div>
+              <div className="grid gap-1">
+                <Label>Email</Label>
+                <Input value={edit.email} onChange={(e) => setEdit({ ...edit!, email: e.target.value })} />
+              </div>
+              <div className="grid gap-1">
+                <Label>Department</Label>
+                <Select value={edit.department || departments[0]} onValueChange={(v) => setEdit({ ...edit!, department: v })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {departments.map((d) => (
+                      <SelectItem key={d} value={d}>{toTitle(d)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-1">
+                <Label>Role</Label>
+                <Select value={edit.role || rolesByDept[edit.department || departments[0]][0]} onValueChange={(v) => setEdit({ ...edit!, role: v })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(rolesByDept[edit.department || departments[0]] || []).map((r) => (
+                      <SelectItem key={r} value={r}>{r}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setEditOpen(false)}>Cancel</Button>
+            <Button onClick={() => { if (!edit) return; updateTeamMember(edit.id, { name: edit.name, email: edit.email, department: edit.department, role: edit.role }); setEditOpen(false); }}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
