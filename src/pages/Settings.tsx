@@ -101,3 +101,6 @@ export default function SettingsPage() {
       </Card>
 
       <AddBusinessDialog open={addOpen} onOpenChange={setAddOpen} />
+    </div>
+  );
+}
