@@ -7,16 +7,15 @@ import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
 
 function VaultContent() {
   const { apiKeys, removeApiKey, addApiKey, currentBusiness } = useData();
   const { requirePasswordCheck } = useAuth();
+  const { toast } = useToast();
   const [revealId, setRevealId] = useState<string | null>(null);
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2>(1);
   const [password, setPassword] = useState("");
-  const [otpEmail, setOtpEmail] = useState("");
-  const [otpSms, setOtpSms] = useState("");
-  const [codes, setCodes] = useState<{ email: string; sms: string } | null>(null);
   const [newKey, setNewKey] = useState<Omit<ApiKey, "id" | "createdAt">>({
     businessId: currentBusiness?.id || "",
     label: "",
@@ -39,22 +38,10 @@ function VaultContent() {
     setRevealId(id);
     setStep(1);
     setPassword("");
-    setCodes(null);
-    setOtpEmail("");
-    setOtpSms("");
   };
 
-  const sendOtps = () => {
-    const gen = () => Math.floor(100000 + Math.random() * 900000).toString();
-    const email = gen();
-    const sms = gen();
-    setCodes({ email, sms });
-    // Demo only: surface codes in UI (in production these are sent via backend)
-    alert(`Demo OTPs — Email: ${email} | SMS: ${sms}`);
-  };
 
-  const canProceed2 = useMemo(() => requirePasswordCheck(password), [password, requirePasswordCheck]);
-  const canReveal = useMemo(() => codes && otpEmail === codes.email && otpSms === codes.sms, [codes, otpEmail, otpSms]);
+  const canReveal = useMemo(() => requirePasswordCheck(password), [password, requirePasswordCheck]);
 
   return (
     <div className="space-y-6">
@@ -113,32 +100,28 @@ function VaultContent() {
               <div className="text-sm text-muted-foreground">Re-enter your password to continue.</div>
               <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
               <DialogFooter>
-                <Button disabled={!canProceed2} onClick={() => setStep(2)}>Continue</Button>
+                <Button
+                  disabled={!password}
+                  onClick={() => {
+                    if (requirePasswordCheck(password)) {
+                      setStep(2);
+                    } else {
+                      toast({
+                        variant: "destructive",
+                        title: "Incorrect password",
+                        description: "Please try again.",
+                      });
+                    }
+                  }}
+                >
+                  Reveal
+                </Button>
               </DialogFooter>
             </div>
           )}
           {step === 2 && (
             <div className="space-y-3">
-              <div className="text-sm text-muted-foreground">Enter the OTPs sent to your email and SMS.</div>
-              <Button variant="secondary" onClick={sendOtps}>Send OTPs</Button>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="grid gap-1">
-                  <Label>Email OTP</Label>
-                  <Input value={otpEmail} onChange={(e) => setOtpEmail(e.target.value)} />
-                </div>
-                <div className="grid gap-1">
-                  <Label>SMS OTP</Label>
-                  <Input value={otpSms} onChange={(e) => setOtpSms(e.target.value)} />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button disabled={!canReveal} onClick={() => setStep(3)}>Verify</Button>
-              </DialogFooter>
-            </div>
-          )}
-          {step === 3 && (
-            <div className="space-y-3">
-              <div className="text-sm text-muted-foreground">Key revealed (demo only):</div>
+              <div className="text-sm text-muted-foreground">Key revealed:</div>
               <div className="p-3 rounded-md border font-mono text-sm">
                 {apiKeys.find((k) => k.id === revealId)?.secret}
               </div>

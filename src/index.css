@@ -24,7 +24,7 @@ All colors MUST be HSL.
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted-foreground: 215.4 16.3% 35%;
 
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
@@ -107,4 +107,22 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
   }
+}
+
+@layer utilities {
+  .hover-scale {
+    @apply transition-transform duration-200 hover:scale-105;
+  }
+  .animate-enter {
+    animation: fade-in 0.3s ease-out, scale-in 0.2s ease-out;
+  }
+}
+
+@keyframes fade-in {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes scale-in {
+  0% { transform: scale(0.98); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }

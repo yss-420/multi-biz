@@ -1,12 +1,28 @@
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useData } from "@/context/DataContext";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { LogOut } from "lucide-react";
+import { LogOut, PanelLeft } from "lucide-react";
 import { Outlet } from "react-router-dom";
 import { useEffect } from "react";
+
+function SidebarFloatingToggle() {
+  const { toggleSidebar, state } = useSidebar();
+  return (
+    <Button
+      size="icon"
+      aria-label="Toggle sidebar"
+      aria-pressed={state === "expanded"}
+      className="fixed left-3 bottom-4 z-50 rounded-full shadow-md bg-primary text-primary-foreground hover:opacity-90 hover-scale animate-enter"
+      onClick={toggleSidebar}
+    >
+      <PanelLeft className="h-4 w-4" />
+      <span className="sr-only">Toggle sidebar</span>
+    </Button>
+  );
+}
 
 export default function AppLayout() {
   const { businesses, selectedBusinessId, selectBusiness } = useData();
@@ -44,11 +60,12 @@ export default function AppLayout() {
         </header>
         <div className="flex flex-1 w-full">
           <AppSidebar />
-          <main className="flex-1 p-6 bg-background">
+          <main className="flex-1 p-6 bg-background animate-enter">
             <Outlet />
           </main>
         </div>
-      </div>
-    </SidebarProvider>
+        </div>
+        <SidebarFloatingToggle />
+      </SidebarProvider>
   );
 }
