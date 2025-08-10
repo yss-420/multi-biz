@@ -8,56 +8,54 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: hsl(200 23.0769% 97.4510%);
+    --foreground: hsl(0 0% 20%);
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: hsl(0 0% 100%);
+    --card-foreground: hsl(0 0% 20%);
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: hsl(0 0% 100%);
+    --popover-foreground: hsl(0 0% 20%);
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: hsl(349.5238 100% 87.6471%);
+    --primary-foreground: hsl(0 0% 0%);
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: hsl(197.4000 71.4286% 72.5490%);
+    --secondary-foreground: hsl(0 0% 0%);
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 35%;
+    --muted: hsl(50.4000 26.8817% 81.7647%);
+    --muted-foreground: hsl(0 0% 43.1373%);
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: hsl(60 100% 50%);
+    --accent-foreground: hsl(0 0% 0%);
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: hsl(0 84.2365% 60.1961%);
+    --destructive-foreground: hsl(0 0% 100%);
 
     --success: 142 69% 53%;
     --success-foreground: 210 40% 98%;
     --warning: 45 93% 47%;
     --warning-foreground: 222.2 84% 4.9%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: hsl(0 0% 83.1373%);
+    --input: hsl(0 0% 83.1373%);
+    --ring: hsl(349.5238 100% 87.6471%);
+
+    /* Typography */
+    --font-sans: Nata Sans, ui-sans-serif, sans-serif, system-ui;
+    --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+    --font-mono: Roboto Mono, monospace;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar: hsl(200 23.0769% 97.4510%);
+    --sidebar-foreground: hsl(0 0% 20%);
+    --sidebar-primary: hsl(349.5238 100% 87.6471%);
+    --sidebar-primary-foreground: hsl(0 0% 0%);
+    --sidebar-accent: hsl(60 100% 50%);
+    --sidebar-accent-foreground: hsl(0 0% 0%);
+    --sidebar-border: hsl(0 0% 83.1373%);
+    --sidebar-ring: hsl(349.5238 100% 87.6471%);
 
     /* Business label colors */
     --biz-red: 0 84% 60%;
@@ -68,53 +66,52 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: hsl(223.8136 0.0000% 9.0527%);
+    --foreground: hsl(0 0% 89.8039%);
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: hsl(197.1429 6.9307% 19.8039%);
+    --card-foreground: hsl(0 0% 89.8039%);
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: hsl(197.1429 6.9307% 19.8039%);
+    --popover-foreground: hsl(0 0% 89.8039%);
 
-    --primary: 199 89% 48%;
-    --primary-foreground: 0 0% 100%;
+    --primary: hsl(292.0351 102.9149% 71.2967%);
+    --primary-foreground: hsl(0 0% 0%);
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: hsl(288.2598 100.6521% 90.6975%);
+    --secondary-foreground: hsl(0 0% 0%);
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: hsl(0 0% 26.6667%);
+    --muted-foreground: hsl(0 0% 63.9216%);
 
-    --accent: 161 94% 30%;
-    --accent-foreground: 210 40% 98%;
+    --accent: hsl(197.4000 71.4286% 72.5490%);
+    --accent-foreground: hsl(0 0% 0%);
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: hsl(0 84.2365% 60.1961%);
+    --destructive-foreground: hsl(0 0% 100%);
 
     --success: 142 60% 40%;
     --success-foreground: 210 40% 98%;
     --warning: 45 93% 43%;
     --warning-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 199 89% 48%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 199 89% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217.2 32.6% 17.5%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 199 89% 48%;
+    --border: hsl(0 0% 26.6667%);
+    --input: hsl(0 0% 26.6667%);
+    --ring: hsl(330 100.0000% 80%);
 
-    /* Business label colors */
-    --biz-red: 0 62% 45%;
-    --biz-green: 142 60% 40%;
-    --biz-yellow: 45 93% 43%;
-    --biz-blue: 199 89% 48%;
-    --biz-purple: 266 60% 55%;
+    /* Typography */
+    --font-sans: Nata Sans, ui-sans-serif, sans-serif, system-ui;
+    --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+    --font-mono: Roboto Mono, monospace;
+
+    --sidebar: hsl(220.0000 14.7541% 11.9608%);
+    --sidebar-foreground: hsl(0 0% 89.8039%);
+    --sidebar-primary: hsl(330 100.0000% 80%);
+    --sidebar-primary-foreground: hsl(0 0% 0%);
+    --sidebar-accent: hsl(288.2598 100.6521% 90.6975%);
+    --sidebar-accent-foreground: hsl(0 0% 0%);
+    --sidebar-border: hsl(0 0% 26.6667%);
+    --sidebar-ring: hsl(330 100.0000% 80%);
   }
 }
 
@@ -124,7 +121,7 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
   }
 }
 
