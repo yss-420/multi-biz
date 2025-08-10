@@ -293,6 +293,7 @@ export default function TasksPage() {
                 </PopoverContent>
               </Popover>
             </div>
+          </div>
           <DialogFooter>
             <Button variant="secondary" onClick={() => setOpen(false)}>Cancel</Button>
             <Button onClick={submit}>Add</Button>
