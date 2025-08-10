@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import { Copy } from "lucide-react";
 
 function VaultContent() {
   const { apiKeys, removeApiKey, addApiKey, currentBusiness } = useData();
@@ -46,11 +47,29 @@ function VaultContent() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">API Vault</h1>
+        <h1 className="text-3xl font-bold">API Vault <span className="text-base font-normal text-muted-foreground">({apiKeys.length})</span></h1>
         <div className="flex items-center gap-3">
           <div className="grid grid-cols-3 gap-2"></div>
         </div>
       </div>
+      <Card className="p-4 space-y-3">
+        <div className="font-semibold">Add API Key</div>
+        <div className="grid md:grid-cols-2 gap-3">
+          <div className="grid gap-1">
+            <Label>Label</Label>
+            <Input value={newKey.label} onChange={(e) => setNewKey({ ...newKey, label: e.target.value })} />
+          </div>
+          <div className="grid gap-1">
+            <Label>Provider</Label>
+            <Input value={newKey.provider} onChange={(e) => setNewKey({ ...newKey, provider: e.target.value })} />
+          </div>
+          <div className="md:col-span-2 grid gap-1">
+            <Label>Secret</Label>
+            <Input value={newKey.secret} onChange={(e) => setNewKey({ ...newKey, secret: e.target.value })} />
+          </div>
+        </div>
+        <Button onClick={() => addApiKey(newKey)}>Save Key</Button>
+      </Card>
 
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
         {apiKeys.map((k) => (
@@ -70,25 +89,6 @@ function VaultContent() {
           </Card>
         ))}
       </div>
-
-      <Card className="p-4 space-y-3">
-        <div className="font-semibold">Add API Key</div>
-        <div className="grid md:grid-cols-2 gap-3">
-          <div className="grid gap-1">
-            <Label>Label</Label>
-            <Input value={newKey.label} onChange={(e) => setNewKey({ ...newKey, label: e.target.value })} />
-          </div>
-          <div className="grid gap-1">
-            <Label>Provider</Label>
-            <Input value={newKey.provider} onChange={(e) => setNewKey({ ...newKey, provider: e.target.value })} />
-          </div>
-          <div className="md:col-span-2 grid gap-1">
-            <Label>Secret</Label>
-            <Input value={newKey.secret} onChange={(e) => setNewKey({ ...newKey, secret: e.target.value })} />
-          </div>
-        </div>
-        <Button onClick={() => addApiKey(newKey)}>Save Key</Button>
-      </Card>
 
       <Dialog open={!!revealId} onOpenChange={(o) => !o && setRevealId(null)}>
         <DialogContent>
@@ -122,8 +122,21 @@ function VaultContent() {
           {step === 2 && (
             <div className="space-y-3">
               <div className="text-sm text-muted-foreground">Key revealed:</div>
-              <div className="p-3 rounded-md border font-mono text-sm">
-                {apiKeys.find((k) => k.id === revealId)?.secret}
+              <div className="p-3 rounded-md border font-mono text-sm flex items-center justify-between gap-3">
+                <span className="truncate">{apiKeys.find((k) => k.id === revealId)?.secret}</span>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    const s = apiKeys.find((k) => k.id === revealId)?.secret;
+                    if (s) {
+                      navigator.clipboard.writeText(s);
+                      toast({ title: "Copied" });
+                    }
+                  }}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
               </div>
               <DialogFooter>
                 <Button onClick={() => setRevealId(null)}>Close</Button>

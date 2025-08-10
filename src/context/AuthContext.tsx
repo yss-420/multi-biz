@@ -19,6 +19,7 @@ type AuthContextValue = {
   logout: () => void;
   isOwner: boolean;
   requirePasswordCheck: (password: string) => boolean;
+  changePassword: (current: string, next: string) => boolean;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -67,6 +68,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     navigate("/login");
   };
 
+  const changePassword = (current: string, next: string) => {
+    if (!user) return false;
+    if (user.password !== current) return false;
+    const updated = { ...user, password: next };
+    setUser(updated);
+    return true;
+  };
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
@@ -75,6 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       logout,
       isOwner: user?.role === "owner",
       requirePasswordCheck: (password: string) => (user ? user.password === password : false),
+      changePassword,
     }),
     [user]
   );

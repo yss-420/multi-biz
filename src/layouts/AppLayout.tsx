@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LogOut, PanelLeft } from "lucide-react";
 import { Outlet } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import AddBusinessDialog from "@/components/AddBusinessDialog";
 
 function SidebarFloatingToggle() {
   const { toggleSidebar, state } = useSidebar();
@@ -27,6 +28,7 @@ function SidebarFloatingToggle() {
 export default function AppLayout() {
   const { businesses, selectedBusinessId, selectBusiness } = useData();
   const { user, logout } = useAuth();
+  const [addOpen, setAddOpen] = useState(false);
 
   useEffect(() => {
     document.title = "MultiBiz – Operations Hub";
@@ -39,7 +41,7 @@ export default function AppLayout() {
           <SidebarTrigger className="" />
           <div className="font-semibold">MultiBiz</div>
           <div className="ml-auto flex items-center gap-3">
-            <Select value={selectedBusinessId} onValueChange={selectBusiness}>
+            <Select value={selectedBusinessId} onValueChange={(v) => (v === "__add__" ? setAddOpen(true) : selectBusiness(v))}>
               <SelectTrigger className="w-56">
                 <SelectValue placeholder="Select a business" />
               </SelectTrigger>
@@ -49,6 +51,9 @@ export default function AppLayout() {
                     {b.name}
                   </SelectItem>
                 ))}
+                {user?.role === "owner" && (
+                  <SelectItem value="__add__">+ Add new business…</SelectItem>
+                )}
               </SelectContent>
             </Select>
             {user && (
@@ -64,8 +69,9 @@ export default function AppLayout() {
             <Outlet />
           </main>
         </div>
-        </div>
-        <SidebarFloatingToggle />
-      </SidebarProvider>
+      </div>
+      <AddBusinessDialog open={addOpen} onOpenChange={setAddOpen} />
+      <SidebarFloatingToggle />
+    </SidebarProvider>
   );
 }

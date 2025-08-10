@@ -1,18 +1,56 @@
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useData } from "@/context/DataContext";
+import { useNavigate } from "react-router-dom";
+import { PlusCircle, ListChecks, CreditCard, Key } from "lucide-react";
+import AddBusinessDialog from "@/components/AddBusinessDialog";
 
 export default function Dashboard() {
-  const { upcomingRenewals, tasksForSelected, currentBusiness } = useData();
+  const { upcomingRenewals, tasksForSelected, currentBusiness, subscriptions, apiKeys, team, selectedBusinessId } = useData();
   const upcoming = upcomingRenewals();
+  const navigate = useNavigate();
+  const [addOpen, setAddOpen] = useState(false);
 
   useEffect(() => {
     document.title = `Dashboard – ${currentBusiness?.name ?? "MultiBiz"}`;
   }, [currentBusiness?.name]);
 
+  const kpis = useMemo(() => {
+    const subs = subscriptions.filter((s) => s.businessId === selectedBusinessId);
+    const monthly = subs.reduce((sum, s) => sum + (s.cycle === "monthly" ? s.cost : s.cost / 12), 0);
+    const apiCount = apiKeys.filter((k) => k.businessId === selectedBusinessId).length;
+    const teamCount = team.filter((m) => m.assignedBusinessIds.includes(selectedBusinessId)).length;
+    const completed = tasksForSelected.filter((t) => t.completed).length;
+    return { monthly: monthly.toFixed(2), apiCount, teamCount, completed };
+  }, [subscriptions, selectedBusinessId, apiKeys, team, tasksForSelected]);
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Dashboard</h1>
+
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <Card className="p-4"><div className="text-sm text-muted-foreground">Tasks Completed</div><div className="text-2xl font-bold">{kpis.completed}</div></Card>
+        <Card className="p-4"><div className="text-sm text-muted-foreground">Monthly Spend</div><div className="text-2xl font-bold">${kpis.monthly}</div></Card>
+        <Card className="p-4"><div className="text-sm text-muted-foreground">API Keys</div><div className="text-2xl font-bold">{kpis.apiCount}</div></Card>
+        <Card className="p-4"><div className="text-sm text-muted-foreground">Team Members</div><div className="text-2xl font-bold">{kpis.teamCount}</div></Card>
+      </div>
+
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <Button variant="secondary" className="justify-start" onClick={() => setAddOpen(true)}>
+          <PlusCircle className="mr-2 h-4 w-4" /> Add Business
+        </Button>
+        <Button variant="secondary" className="justify-start" onClick={() => navigate("/tasks") }>
+          <ListChecks className="mr-2 h-4 w-4" /> Create Task
+        </Button>
+        <Button variant="secondary" className="justify-start" onClick={() => navigate("/subscriptions")}>
+          <CreditCard className="mr-2 h-4 w-4" /> Track Subscription
+        </Button>
+        <Button variant="secondary" className="justify-start" onClick={() => navigate("/vault")}>
+          <Key className="mr-2 h-4 w-4" /> Store API Key
+        </Button>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
@@ -56,6 +94,8 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+
+      <AddBusinessDialog open={addOpen} onOpenChange={setAddOpen} />
     </div>
   );
 }

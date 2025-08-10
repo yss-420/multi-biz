@@ -16,6 +16,7 @@ export type Subscription = {
   status: "active" | "cancelled";
 };
 export type Priority = "low" | "medium" | "high";
+export type TaskStatus = "todo" | "in-progress" | "completed";
 export type Task = {
   id: ID;
   businessId: ID;
@@ -25,6 +26,7 @@ export type Task = {
   priority: Priority;
   dueDate?: string;
   assigneeId?: ID;
+  status?: TaskStatus;
 };
 export type ApiKey = {
   id: ID;
@@ -41,6 +43,8 @@ export type TeamMember = {
   email: string;
   assignedBusinessIds: ID[];
   status: "active" | "inactive";
+  role?: string;
+  department?: string;
 };
 
 export type Settings = {
@@ -59,6 +63,7 @@ export type DataState = {
 
 type DataContextValue = DataState & {
   selectBusiness: (id: ID) => void;
+  addBusiness: (name: string) => Business;
   addSubscription: (s: Omit<Subscription, "id">) => void;
   updateSubscription: (s: Subscription) => void;
   removeSubscription: (id: ID) => void;
@@ -152,6 +157,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const api = useMemo<DataContextValue>(() => {
     const selectBusiness = (id: ID) => setState((s) => ({ ...s, selectedBusinessId: id }));
 
+    const addBusiness = (name: string): Business => {
+      const b: Business = { id: uid(), name };
+      setState((st) => ({ ...st, businesses: [...st.businesses, b] }));
+      return b;
+    };
+
     const addSubscription = (s: Omit<Subscription, "id">) =>
       setState((st) => ({ ...st, subscriptions: [{ id: uid(), ...s }, ...st.subscriptions] }));
 
@@ -169,7 +180,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const toggleTask = (id: ID) =>
       setState((st) => ({
         ...st,
-        tasks: st.tasks.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)),
+        tasks: st.tasks.map((t) =>
+          t.id === id ? { ...t, completed: !t.completed, status: !t.completed ? "completed" : (t.status === "completed" ? "todo" : t.status) } : t
+        ),
       }));
 
     const removeTask = (id: ID) => setState((st) => ({ ...st, tasks: st.tasks.filter((t) => t.id !== id) }));
@@ -205,6 +218,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return {
       ...state,
       selectBusiness,
+      addBusiness,
       addSubscription,
       updateSubscription,
       removeSubscription,
