@@ -26,13 +26,32 @@ function SidebarFloatingToggle() {
 }
 
 export default function AppLayout() {
-  const { businesses, selectedBusinessId, selectBusiness } = useData();
+  const { businesses, selectedBusinessId, selectBusiness, team } = useData();
   const { user, logout } = useAuth();
   const [addOpen, setAddOpen] = useState(false);
 
   useEffect(() => {
     document.title = "MultiBiz – Operations Hub";
   }, []);
+
+  // Compute visible businesses for members
+  const visibleBusinesses = user?.role === "owner"
+    ? businesses
+    : (() => {
+        const member = team.find((m) => m.email.toLowerCase() === user?.email.toLowerCase());
+        const allowed = member ? businesses.filter((b) => member.assignedBusinessIds.includes(b.id)) : [];
+        return allowed;
+      })();
+
+  useEffect(() => {
+    if (user?.role === "member") {
+      const member = team.find((m) => m.email.toLowerCase() === user.email.toLowerCase());
+      const allowedIds = member ? member.assignedBusinessIds : [];
+      if (allowedIds.length && !allowedIds.includes(selectedBusinessId)) {
+        selectBusiness(allowedIds[0]);
+      }
+    }
+  }, [user?.role, team, selectedBusinessId]);
 
   return (
     <SidebarProvider>
@@ -42,13 +61,19 @@ export default function AppLayout() {
           <div className="font-semibold">MultiBiz</div>
           <div className="ml-auto flex items-center gap-3">
             <Select value={selectedBusinessId} onValueChange={(v) => (v === "__add__" ? setAddOpen(true) : selectBusiness(v))}>
-              <SelectTrigger className="w-56">
+              <SelectTrigger className="w-64">
                 <SelectValue placeholder="Select a business" />
               </SelectTrigger>
               <SelectContent>
-                {businesses.map((b) => (
+                {visibleBusinesses.map((b) => (
                   <SelectItem key={b.id} value={b.id}>
-                    {b.name}
+                    <span className="inline-flex items-center">
+                      <span
+                        className="mr-2 h-3 w-3 rounded-full border"
+                        style={{ backgroundColor: b.color ? `hsl(var(--${b.color}))` : undefined }}
+                      />
+                      {b.name}
+                    </span>
                   </SelectItem>
                 ))}
                 {user?.role === "owner" && (

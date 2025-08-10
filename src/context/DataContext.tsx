@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from "
 
 export type ID = string;
 
-export type Business = { id: ID; name: string };
+export type Business = { id: ID; name: string; color?: string };
 export type Subscription = {
   id: ID;
   businessId: ID;
@@ -63,17 +63,19 @@ export type DataState = {
 
 type DataContextValue = DataState & {
   selectBusiness: (id: ID) => void;
-  addBusiness: (name: string) => Business;
+  addBusiness: (name: string, color?: string) => Business;
   addSubscription: (s: Omit<Subscription, "id">) => void;
   updateSubscription: (s: Subscription) => void;
   removeSubscription: (id: ID) => void;
   addTask: (t: Omit<Task, "id">) => void;
   toggleTask: (id: ID) => void;
+  updateTask: (id: ID, patch: Partial<Task>) => void;
   removeTask: (id: ID) => void;
   addApiKey: (k: Omit<ApiKey, "id" | "createdAt">) => void;
   removeApiKey: (id: ID) => void;
   addTeamMember: (m: Omit<TeamMember, "id" | "status">) => void;
   assignMemberToBusinesses: (memberId: ID, businessIds: ID[]) => void;
+  updateTeamMember: (memberId: ID, patch: Partial<TeamMember>) => void;
   currentBusiness: Business | undefined;
   subsForSelected: Subscription[];
   tasksForSelected: Task[];
@@ -88,7 +90,7 @@ const uid = () => Math.random().toString(36).slice(2, 10);
 const initialState = (): DataState => {
   const stored = localStorage.getItem(LS_KEY);
   if (stored) return JSON.parse(stored);
-  const biz1: Business = { id: uid(), name: "Secret Share" };
+  const biz1: Business = { id: uid(), name: "Secret Share", color: "biz-blue" };
   const today = new Date();
   const inDays = (d: number) => new Date(today.getTime() + d * 86400000).toISOString();
   return {
@@ -157,8 +159,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const api = useMemo<DataContextValue>(() => {
     const selectBusiness = (id: ID) => setState((s) => ({ ...s, selectedBusinessId: id }));
 
-    const addBusiness = (name: string): Business => {
-      const b: Business = { id: uid(), name };
+    const addBusiness = (name: string, color?: string): Business => {
+      const b: Business = { id: uid(), name, color };
       setState((st) => ({ ...st, businesses: [...st.businesses, b] }));
       return b;
     };
@@ -185,6 +187,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ),
       }));
 
+    const updateTask = (id: ID, patch: Partial<Task>) =>
+      setState((st) => ({
+        ...st,
+        tasks: st.tasks.map((t) => (t.id === id ? { ...t, ...patch } : t)),
+      }));
+
     const removeTask = (id: ID) => setState((st) => ({ ...st, tasks: st.tasks.filter((t) => t.id !== id) }));
 
     const addApiKey = (k: Omit<ApiKey, "id" | "createdAt">) =>
@@ -201,6 +209,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         team: st.team.map((m) => (m.id === memberId ? { ...m, assignedBusinessIds: businessIds } : m)),
       }));
 
+    const updateTeamMember = (memberId: ID, patch: Partial<TeamMember>) =>
+      setState((st) => ({
+        ...st,
+        team: st.team.map((m) => (m.id === memberId ? { ...m, ...patch } : m)),
+      }));
+
     const currentBusiness = state.businesses.find((b) => b.id === state.selectedBusinessId);
 
     const subsForSelected = state.subscriptions.filter((s) => s.businessId === state.selectedBusinessId);
@@ -210,6 +224,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const now = new Date();
       const in30 = new Date(now.getTime() + 30 * 86400000);
       return state.subscriptions
+        .filter((s) => s.businessId === state.selectedBusinessId)
         .filter((s) => new Date(s.renewalDate) <= in30 && new Date(s.renewalDate) >= now)
         .sort((a, b) => new Date(a.renewalDate).getTime() - new Date(b.renewalDate).getTime())
         .slice(0, 5);
@@ -224,11 +239,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       removeSubscription,
       addTask,
       toggleTask,
+      updateTask,
       removeTask,
       addApiKey,
       removeApiKey,
       addTeamMember,
       assignMemberToBusinesses,
+      updateTeamMember,
       currentBusiness,
       subsForSelected,
       tasksForSelected,

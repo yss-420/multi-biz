@@ -32,6 +32,11 @@ All colors MUST be HSL.
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
+    --success: 142 69% 53%;
+    --success-foreground: 210 40% 98%;
+    --warning: 45 93% 47%;
+    --warning-foreground: 222.2 84% 4.9%;
+
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
@@ -53,6 +58,13 @@ All colors MUST be HSL.
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Business label colors */
+    --biz-red: 0 84% 60%;
+    --biz-green: 142 69% 53%;
+    --biz-yellow: 45 93% 47%;
+    --biz-blue: 199 89% 48%;
+    --biz-purple: 266 72% 60%;
   }
 
   .dark {
@@ -80,6 +92,11 @@ All colors MUST be HSL.
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
+    --success: 142 60% 40%;
+    --success-foreground: 210 40% 98%;
+    --warning: 45 93% 43%;
+    --warning-foreground: 210 40% 98%;
+
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 199 89% 48%;
@@ -92,10 +109,12 @@ All colors MUST be HSL.
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 199 89% 48%;
 
-    /* Extras: gradients, shadows, motion */
-    --gradient-primary: linear-gradient(135deg, hsl(199 89% 54%), hsl(161 94% 40%));
-    --shadow-glow: 0 0 24px hsl(199 89% 48% / 0.35);
-    --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Business label colors */
+    --biz-red: 0 62% 45%;
+    --biz-green: 142 60% 40%;
+    --biz-yellow: 45 93% 43%;
+    --biz-blue: 199 89% 48%;
+    --biz-purple: 266 60% 55%;
   }
 }
 
