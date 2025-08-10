@@ -1,21 +1,32 @@
-import { useEffect, useState } from "react";
-import { useData } from "@/context/DataContext";
+import { useEffect, useMemo, useState } from "react";
+import { useData, TeamMember } from "@/context/DataContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RequireOwner } from "@/context/AuthContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Pencil } from "lucide-react";
 
 function TeamContent() {
-  const { team, businesses, addTeamMember, assignMemberToBusinesses, currentBusiness } = useData();
+  const { team, businesses, addTeamMember, assignMemberToBusinesses, currentBusiness, updateTeamMember } = useData();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
-  const roles = ["co-founder", "ceo", "cto"];
-  const departments = ["leadership", "marketing", "sales", "engineering", "operations"];
-  const [role, setRole] = useState<string>(roles[0]);
+  const departments = ["leadership", "engineering", "marketing", "sales", "operations"];
+  const rolesByDept: Record<string, string[]> = {
+    leadership: ["ceo", "co-founder", "cto", "coo"],
+    engineering: ["engineer", "designer", "pm"],
+    marketing: ["marketer", "seo", "content"],
+    sales: ["sales rep", "account exec"],
+    operations: ["ops manager", "support"],
+  };
   const [department, setDepartment] = useState<string>(departments[0]);
+  const roles = useMemo(() => rolesByDept[department] ?? [], [department]);
+  const [role, setRole] = useState<string>(rolesByDept[departments[0]][0]);
+  const [edit, setEdit] = useState<TeamMember | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
 
   useEffect(() => {
     document.title = `Team – ${currentBusiness?.name ?? "MultiBiz"}`;

@@ -7,9 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
+import { Pencil, Trash2 } from "lucide-react";
 
 export default function SubscriptionsPage() {
-  const { subsForSelected, addSubscription, currentBusiness } = useData();
+  const { subsForSelected, addSubscription, updateSubscription, removeSubscription, currentBusiness } = useData();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<Omit<Subscription, "id">>({
     businessId: "",
@@ -22,6 +23,14 @@ export default function SubscriptionsPage() {
     notes: "",
     status: "active",
   });
+
+  const [editOpen, setEditOpen] = useState(false);
+  const [edit, setEdit] = useState<Subscription | null>(null);
+
+  const startEdit = (s: Subscription) => {
+    setEdit({ ...s });
+    setEditOpen(true);
+  };
 
   useEffect(() => {
     document.title = `Subscriptions – ${currentBusiness?.name ?? "MultiBiz"}`;
@@ -88,10 +97,59 @@ export default function SubscriptionsPage() {
               <Button onClick={onSubmit}>Save</Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
-      </div>
+          </Dialog>
+        </div>
 
-      <Card className="p-0">
+        {edit && (
+          <Dialog open={editOpen} onOpenChange={setEditOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Edit Subscription</DialogTitle>
+              </DialogHeader>
+              <div className="grid gap-4">
+                <div className="grid gap-1">
+                  <Label>Service Name</Label>
+                  <Input value={edit.serviceName} onChange={(e) => setEdit({ ...edit!, serviceName: e.target.value })} />
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="grid gap-1">
+                    <Label>Cost</Label>
+                    <Input type="number" value={edit.cost} onChange={(e) => setEdit({ ...edit!, cost: Number(e.target.value) })} />
+                  </div>
+                  <div className="grid gap-1">
+                    <Label>Currency</Label>
+                    <Input value={edit.currency} onChange={(e) => setEdit({ ...edit!, currency: e.target.value })} />
+                  </div>
+                  <div className="grid gap-1">
+                    <Label>Cycle</Label>
+                    <Select value={edit.cycle} onValueChange={(v) => setEdit({ ...edit!, cycle: v as any })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                        <SelectItem value="yearly">Yearly</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid gap-1">
+                  <Label>Renewal Date</Label>
+                  <Input type="date" value={edit.renewalDate.slice(0,10)} onChange={(e) => setEdit({ ...edit!, renewalDate: new Date(e.target.value).toISOString() })} />
+                </div>
+                <div className="grid gap-1">
+                  <Label>Notes</Label>
+                  <Input value={edit.notes || ""} onChange={(e) => setEdit({ ...edit!, notes: e.target.value })} />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button onClick={() => { if (edit) updateSubscription(edit); setEditOpen(false); }}>Save</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
+
+        <Card className="p-0">
         <Table>
           <TableHeader>
             <TableRow>
@@ -99,6 +157,7 @@ export default function SubscriptionsPage() {
               <TableHead>Cost</TableHead>
               <TableHead>Cycle</TableHead>
               <TableHead>Renewal</TableHead>
+              <TableHead className="w-[100px] text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -110,6 +169,14 @@ export default function SubscriptionsPage() {
                 </TableCell>
                 <TableCell className="capitalize">{s.cycle}</TableCell>
                 <TableCell>{new Date(s.renewalDate).toLocaleDateString()}</TableCell>
+                <TableCell className="text-right">
+                  <Button variant="ghost" size="icon" aria-label="Edit" onClick={() => startEdit(s)}>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" aria-label="Delete" onClick={() => removeSubscription(s.id)}>
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

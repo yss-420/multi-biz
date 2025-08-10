@@ -12,11 +12,13 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Trash2 } from "lucide-react";
 export default function TasksPage() {
-  const { tasksForSelected, addTask, toggleTask, removeTask, currentBusiness } = useData();
+  const { tasksForSelected, addTask, toggleTask, removeTask, currentBusiness, updateTask } = useData();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState("medium");
+  const [priority, setPriority] = useState<Task["priority"]>("medium");
+  const [activeTab, setActiveTab] = useState<"todo" | "in-progress" | "completed">("todo");
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     document.title = `Tasks – ${currentBusiness?.name ?? "MultiBiz"}`;
@@ -49,6 +51,13 @@ export default function TasksPage() {
     };
   }, [tasksForSelected]);
 
+  const priorityCls = (p: Task["priority"]) =>
+    p === "high" ? "bg-destructive text-destructive-foreground" : p === "medium" ? "bg-warning text-warning-foreground" : "bg-success text-success-foreground";
+
+  const changeStatus = (id: string, status: Task["status"]) => {
+    updateTask(id, { status, completed: status === "completed" });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -56,49 +65,99 @@ export default function TasksPage() {
         <Button onClick={() => setOpen(true)}>Create Task</Button>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-3">
-        <Card className="p-4 space-y-2">
-          <div className="font-semibold">To Do</div>
-          {groups.todo.map((t) => (
-            <Card key={t.id} className="p-3 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Checkbox checked={t.completed} onCheckedChange={() => toggleTask(t.id)} />
-                <div>{t.title}</div>
-              </div>
-              <Button variant="secondary" size="sm" onClick={() => removeTask(t.id)}>Delete</Button>
-            </Card>
-          ))}
-          {groups.todo.length === 0 && <div className="text-muted-foreground text-sm">No tasks.</div>}
-        </Card>
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
+        <TabsList>
+          <TabsTrigger value="todo">To Do</TabsTrigger>
+          <TabsTrigger value="in-progress">In Progress</TabsTrigger>
+          <TabsTrigger value="completed">Completed</TabsTrigger>
+        </TabsList>
 
-        <Card className="p-4 space-y-2">
-          <div className="font-semibold">In Progress</div>
-          {groups.inprogress.map((t) => (
-            <Card key={t.id} className="p-3 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Checkbox checked={t.completed} onCheckedChange={() => toggleTask(t.id)} />
-                <div>{t.title}</div>
-              </div>
-              <Button variant="secondary" size="sm" onClick={() => removeTask(t.id)}>Delete</Button>
-            </Card>
-          ))}
-          {groups.inprogress.length === 0 && <div className="text-muted-foreground text-sm">Nothing here.</div>}
-        </Card>
+        <TabsContent value="todo">
+          <Card className="p-4 space-y-2">
+            <div className="font-semibold">To Do</div>
+            {groups.todo.map((t) => (
+              <Card key={t.id} className="p-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Checkbox checked={t.completed} onCheckedChange={() => toggleTask(t.id)} />
+                    <button className="text-left" onClick={() => setExpanded((e) => ({ ...e, [t.id]: !e[t.id] }))}>
+                      <div className="font-medium">{t.title}</div>
+                      {expanded[t.id] && t.description && (
+                        <div className="text-sm text-muted-foreground mt-1">{t.description}</div>
+                      )}
+                    </button>
+                    <span className={`px-2 py-0.5 rounded text-xs capitalize ${priorityCls(t.priority)}`}>{t.priority}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Select value={t.status ?? "todo"} onValueChange={(v) => changeStatus(t.id, v as any)}>
+                      <SelectTrigger className="h-8 w-[140px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="todo">To Do</SelectItem>
+                        <SelectItem value="in-progress">In Progress</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button variant="ghost" size="icon" onClick={() => removeTask(t.id)} aria-label="Delete task">
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            ))}
+            {groups.todo.length === 0 && <div className="text-muted-foreground text-sm">No tasks.</div>}
+          </Card>
+        </TabsContent>
 
-        <Card className="p-4 space-y-2">
-          <div className="font-semibold">Completed</div>
-          {groups.completed.map((t) => (
-            <Card key={t.id} className="p-3 flex items-center justify-between opacity-75">
-              <div className="flex items-center gap-3">
-                <Checkbox checked={t.completed} onCheckedChange={() => toggleTask(t.id)} />
-                <div className="line-through text-muted-foreground">{t.title}</div>
-              </div>
-              <Button variant="secondary" size="sm" onClick={() => removeTask(t.id)}>Delete</Button>
-            </Card>
-          ))}
-          {groups.completed.length === 0 && <div className="text-muted-foreground text-sm">No completed tasks.</div>}
-        </Card>
-      </div>
+        <TabsContent value="in-progress">
+          <Card className="p-4 space-y-2">
+            <div className="font-semibold">In Progress</div>
+            {groups.inprogress.map((t) => (
+              <Card key={t.id} className="p-3 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Checkbox checked={t.completed} onCheckedChange={() => toggleTask(t.id)} />
+                  <button className="text-left" onClick={() => setExpanded((e) => ({ ...e, [t.id]: !e[t.id] }))}>
+                    <div>{t.title}</div>
+                    {expanded[t.id] && t.description && (
+                      <div className="text-sm text-muted-foreground mt-1">{t.description}</div>
+                    )}
+                  </button>
+                  <span className={`px-2 py-0.5 rounded text-xs capitalize ${priorityCls(t.priority)}`}>{t.priority}</span>
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => removeTask(t.id)} aria-label="Delete task">
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </Card>
+            ))}
+            {groups.inprogress.length === 0 && <div className="text-muted-foreground text-sm">Nothing here.</div>}
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="completed">
+          <Card className="p-4 space-y-2">
+            <div className="font-semibold">Completed</div>
+            {groups.completed.map((t) => (
+              <Card key={t.id} className="p-3 flex items-center justify-between opacity-75">
+                <div className="flex items-center gap-3">
+                  <Checkbox checked={t.completed} onCheckedChange={() => toggleTask(t.id)} />
+                  <button className="text-left" onClick={() => setExpanded((e) => ({ ...e, [t.id]: !e[t.id] }))}>
+                    <div className="line-through text-muted-foreground">{t.title}</div>
+                    {expanded[t.id] && t.description && (
+                      <div className="text-sm text-muted-foreground mt-1 line-through">{t.description}</div>
+                    )}
+                  </button>
+                  <span className={`px-2 py-0.5 rounded text-xs capitalize ${priorityCls(t.priority)}`}>{t.priority}</span>
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => removeTask(t.id)} aria-label="Delete task">
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </Card>
+            ))}
+            {groups.completed.length === 0 && <div className="text-muted-foreground text-sm">No completed tasks.</div>}
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
@@ -116,7 +175,7 @@ export default function TasksPage() {
             </div>
             <div className="grid gap-1">
               <Label>Priority</Label>
-              <Select value={priority} onValueChange={setPriority}>
+              <Select value={priority} onValueChange={(v) => setPriority(v as Task["priority"])}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select priority" />
                 </SelectTrigger>
