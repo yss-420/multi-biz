@@ -14,17 +14,44 @@ function TeamContent() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
-  const departments = ["leadership", "engineering", "marketing", "sales", "operations"];
+  const departments = [
+    "leadership",
+    "product",
+    "engineering",
+    "design",
+    "data",
+    "marketing",
+    "sales",
+    "customer-success",
+    "operations",
+    "finance",
+    "hr",
+    "legal",
+    "it-security",
+    "partnerships",
+    "support",
+  ];
   const rolesByDept: Record<string, string[]> = {
-    leadership: ["ceo", "co-founder", "cto", "coo"],
-    engineering: ["engineer", "designer", "pm"],
-    marketing: ["marketer", "seo", "content"],
-    sales: ["sales rep", "account exec"],
-    operations: ["ops manager", "support"],
+    leadership: ["CEO", "Co-Founder", "CTO", "COO", "CFO", "CPO"],
+    product: ["Product Manager", "Product Owner", "Business Analyst"],
+    engineering: ["Frontend Engineer", "Backend Engineer", "Fullstack Engineer", "Mobile Engineer", "QA Engineer", "SRE", "DevOps", "Data Engineer", "ML Engineer"],
+    design: ["Product Designer", "UX Researcher", "Brand Designer", "Graphic Designer", "UX Writer"],
+    data: ["Data Analyst", "Data Scientist", "BI Analyst"],
+    marketing: ["Marketing Manager", "Content Marketer", "SEO Specialist", "Growth Marketer", "Performance Marketer", "Social Media Manager"],
+    sales: ["SDR", "Account Executive", "Account Manager", "Sales Manager"],
+    "customer-success": ["Customer Success Manager", "Onboarding Specialist"],
+    operations: ["Operations Manager", "Project Manager", "Program Manager"],
+    finance: ["Finance Manager", "Accountant", "Controller"],
+    hr: ["HR Manager", "Recruiter", "People Ops"],
+    legal: ["Legal Counsel", "Compliance Officer"],
+    "it-security": ["IT Admin", "Security Engineer"],
+    partnerships: ["Partnerships Manager", "BD Manager"],
+    support: ["Support Specialist", "Support Engineer"],
   };
   const [department, setDepartment] = useState<string>(departments[0]);
   const roles = useMemo(() => rolesByDept[department] ?? [], [department]);
   const [role, setRole] = useState<string>(rolesByDept[departments[0]][0]);
+  useEffect(() => { setRole((rolesByDept[department] ?? [""])[0]); }, [department]);
   const [edit, setEdit] = useState<TeamMember | null>(null);
   const [editOpen, setEditOpen] = useState(false);
 
@@ -58,19 +85,6 @@ function TeamContent() {
             <Input value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
           <div className="grid gap-1">
-            <Label>Role</Label>
-            <Select value={role} onValueChange={setRole}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select role" />
-              </SelectTrigger>
-              <SelectContent>
-                {roles.map((r) => (
-                  <SelectItem key={r} value={r}>{r}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid gap-1">
             <Label>Department</Label>
             <Select value={department} onValueChange={setDepartment}>
               <SelectTrigger>
@@ -84,12 +98,26 @@ function TeamContent() {
             </Select>
           </div>
           <div className="grid gap-1">
+            <Label>Role</Label>
+            <Select value={role} onValueChange={setRole}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select role" />
+              </SelectTrigger>
+              <SelectContent>
+                {roles.map((r) => (
+                  <SelectItem key={r} value={r}>{r}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid gap-1">
             <Label>Assign to</Label>
-            <Select value={selected[0]} onValueChange={(v) => setSelected([v])}>
+            <Select value={selected.length === businesses.length ? "all" : (selected[0] || undefined)} onValueChange={(v) => v === "all" ? setSelected(businesses.map((b) => b.id)) : setSelected([v])}>
               <SelectTrigger>
                 <SelectValue placeholder="Select business" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="all">All businesses</SelectItem>
                 {businesses.map((b) => (
                   <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
                 ))}
@@ -109,11 +137,12 @@ function TeamContent() {
             <div className="text-sm">Assigned: {m.assignedBusinessIds.map((id) => businesses.find((b) => b.id === id)?.name).join(", ") || "—"}</div>
             <div className="grid gap-1">
               <Label>Change Assignment</Label>
-              <Select value={m.assignedBusinessIds[0]} onValueChange={(v) => assignMemberToBusinesses(m.id, [v])}>
+              <Select value={m.assignedBusinessIds.length === businesses.length ? "all" : (m.assignedBusinessIds[0] || undefined)} onValueChange={(v) => v === "all" ? assignMemberToBusinesses(m.id, businesses.map((b) => b.id)) : assignMemberToBusinesses(m.id, [v])}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="all">All businesses</SelectItem>
                   {businesses.map((b) => (
                     <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
                   ))}

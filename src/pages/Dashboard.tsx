@@ -13,7 +13,7 @@ export default function Dashboard() {
   const [addOpen, setAddOpen] = useState(false);
 
   useEffect(() => {
-    document.title = `Dashboard – ${currentBusiness?.name ?? "MultiBiz"}`;
+    document.title = `${currentBusiness?.name ?? "Business"} Dashboard`;
   }, [currentBusiness?.name]);
 
   const kpis = useMemo(() => {
@@ -27,13 +27,29 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Dashboard</h1>
+      <h1 className="text-3xl font-bold">{currentBusiness?.name ?? "Business"} Dashboard</h1>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <Card className="p-4"><div className="text-sm text-muted-foreground">Tasks Completed</div><div className="text-2xl font-bold">{kpis.completed}</div></Card>
-        <Card className="p-4"><div className="text-sm text-muted-foreground">Monthly Spend</div><div className="text-2xl font-bold">${kpis.monthly}</div></Card>
-        <Card className="p-4"><div className="text-sm text-muted-foreground">API Keys</div><div className="text-2xl font-bold">{kpis.apiCount}</div></Card>
-        <Card className="p-4"><div className="text-sm text-muted-foreground">Team Members</div><div className="text-2xl font-bold">{kpis.teamCount}</div></Card>
+        <Card className="p-4">
+          <div className="text-sm text-muted-foreground">Active Tasks</div>
+          <div className="text-2xl font-bold">{tasksForSelected.filter((t) => !t.completed).length}</div>
+          <div className="text-xs text-muted-foreground mt-1">{kpis.completed} completed</div>
+        </Card>
+        <Card className="p-4">
+          <div className="text-sm text-muted-foreground">Subscriptions</div>
+          <div className="text-2xl font-bold">{subscriptions.filter((s) => s.businessId === selectedBusinessId).length}</div>
+          <div className="text-xs text-muted-foreground mt-1">${kpis.monthly}/month</div>
+        </Card>
+        <Card className="p-4">
+          <div className="text-sm text-muted-foreground">API Keys</div>
+          <div className="text-2xl font-bold">{kpis.apiCount}</div>
+          <div className="text-xs text-muted-foreground mt-1">Secure vault</div>
+        </Card>
+        <Card className="p-4">
+          <div className="text-sm text-muted-foreground">Team Members</div>
+          <div className="text-2xl font-bold">{kpis.teamCount}</div>
+          <div className="text-xs text-muted-foreground mt-1">Active members</div>
+        </Card>
       </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">

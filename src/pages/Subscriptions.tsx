@@ -7,7 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Calendar as CalendarIcon } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
 
 export default function SubscriptionsPage() {
   const { subsForSelected, addSubscription, updateSubscription, removeSubscription, currentBusiness } = useData();
@@ -86,7 +89,26 @@ export default function SubscriptionsPage() {
               </div>
               <div className="grid gap-1">
                 <Label>Renewal Date</Label>
-                <Input type="date" value={form.renewalDate.slice(0,10)} onChange={(e) => setForm({ ...form, renewalDate: new Date(e.target.value).toISOString() })} />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={`w-[240px] justify-start text-left font-normal ${!form.renewalDate ? "text-muted-foreground" : ""}`}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {form.renewalDate ? format(new Date(form.renewalDate), "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={form.renewalDate ? new Date(form.renewalDate) : undefined}
+                      onSelect={(d) => setForm({ ...form, renewalDate: d ? d.toISOString() : form.renewalDate })}
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
               <div className="grid gap-1">
                 <Label>Notes</Label>
@@ -135,7 +157,26 @@ export default function SubscriptionsPage() {
                 </div>
                 <div className="grid gap-1">
                   <Label>Renewal Date</Label>
-                  <Input type="date" value={edit.renewalDate.slice(0,10)} onChange={(e) => setEdit({ ...edit!, renewalDate: new Date(e.target.value).toISOString() })} />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={`w-[240px] justify-start text-left font-normal ${!edit?.renewalDate ? "text-muted-foreground" : ""}`}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {edit?.renewalDate ? format(new Date(edit.renewalDate), "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={edit?.renewalDate ? new Date(edit.renewalDate) : undefined}
+                        onSelect={(d) => setEdit({ ...edit!, renewalDate: d ? d.toISOString() : edit!.renewalDate })}
+                        initialFocus
+                        className="p-3 pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div className="grid gap-1">
                   <Label>Notes</Label>

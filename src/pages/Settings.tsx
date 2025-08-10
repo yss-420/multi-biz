@@ -6,7 +6,6 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import AddBusinessDialog from "@/components/AddBusinessDialog";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function SettingsPage() {
@@ -14,7 +13,7 @@ export default function SettingsPage() {
   const { user, changePassword } = useAuth();
   const { toast } = useToast();
   const [days, setDays] = useState<number[]>(settings.reminderDays);
-  const [addOpen, setAddOpen] = useState(false);
+  
   const [currentPwd, setCurrentPwd] = useState("");
   const [newPwd, setNewPwd] = useState("");
   const [confirmPwd, setConfirmPwd] = useState("");
@@ -58,9 +57,6 @@ export default function SettingsPage() {
 
       <Card className="p-4 space-y-3">
         <div className="font-semibold">Administration</div>
-        <div className="flex items-center gap-3">
-          <Button onClick={() => setAddOpen(true)}>Add new business</Button>
-        </div>
         {user?.role === "owner" && (
           <div className="grid md:grid-cols-3 gap-3 pt-4">
             <div className="grid gap-1">
@@ -100,7 +96,6 @@ export default function SettingsPage() {
         <div className="text-xs text-muted-foreground">Notifications are local-only and will trigger in-app while open.</div>
       </Card>
 
-      <AddBusinessDialog open={addOpen} onOpenChange={setAddOpen} />
     </div>
   );
 }
