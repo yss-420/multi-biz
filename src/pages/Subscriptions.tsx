@@ -11,6 +11,7 @@ import { Pencil, Trash2, Calendar as CalendarIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
 
 export default function SubscriptionsPage() {
   const { subsForSelected, addSubscription, updateSubscription, removeSubscription, currentBusiness } = useData();
@@ -51,7 +52,10 @@ export default function SubscriptionsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Subscriptions</h1>
+        <h1 className="text-3xl font-bold flex items-center gap-3">
+          Subscriptions
+          <Badge variant="secondary" className="text-xs">Total {subsForSelected.length}</Badge>
+        </h1>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button>Add Subscription</Button>

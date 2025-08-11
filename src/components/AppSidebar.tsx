@@ -26,13 +26,15 @@ export function AppSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
-    isActive ? "bg-muted text-primary font-medium" : "hover:bg-muted/50";
+    isActive
+      ? "bg-primary/20 text-foreground ring-1 ring-ring font-semibold"
+      : "hover:bg-muted/50";
 
   return (
     <Sidebar collapsible="icon">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>MultiBiz</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-base md:text-lg font-semibold tracking-tight">MultiBiz</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (

@@ -58,7 +58,7 @@ export default function AppLayout() {
       <div className="min-h-screen w-full flex flex-col">
         <header className="h-14 flex items-center border-b gap-3 px-3">
           <SidebarTrigger className="" />
-          <div className="font-semibold">MultiBiz</div>
+          <div role="heading" aria-level={1} className="ml-2 text-lg md:text-2xl font-bold tracking-tight">MultiBiz</div>
           <div className="ml-auto flex items-center gap-3">
             <Select value={selectedBusinessId} onValueChange={(v) => (v === "__add__" ? setAddOpen(true) : selectBusiness(v))}>
               <SelectTrigger className="w-64">

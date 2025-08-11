@@ -9,11 +9,11 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
-import { Trash2, Pencil, Calendar as CalendarIcon } from "lucide-react";
+import { Trash2, Pencil, Calendar as CalendarIcon, ChevronDown } from "lucide-react";
 export default function TasksPage() {
   const { tasksForSelected, addTask, toggleTask, removeTask, currentBusiness, updateTask } = useData();
   const [open, setOpen] = useState(false);
@@ -21,8 +21,13 @@ export default function TasksPage() {
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<Task["priority"]>("medium");
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
-  const [activeTab, setActiveTab] = useState<"todo" | "in-progress" | "completed">("todo");
+  
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [showMore, setShowMore] = useState<{ todo: boolean; inprogress: boolean; completed: boolean }>({
+    todo: false,
+    inprogress: false,
+    completed: false,
+  });
   const [editOpen, setEditOpen] = useState(false);
   const [editTask, setEditTask] = useState<Task | null>(null);
   const [editTitle, setEditTitle] = useState("");
@@ -78,90 +83,38 @@ export default function TasksPage() {
         <Button onClick={() => setOpen(true)}>Create Task</Button>
       </div>
 
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
-        <TabsList>
-          <TabsTrigger value="todo">To Do</TabsTrigger>
-          <TabsTrigger value="in-progress">In Progress</TabsTrigger>
-          <TabsTrigger value="completed">Completed</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="todo">
-          <Card className="p-4 space-y-2">
-            <div className="font-semibold">To Do</div>
-            {groups.todo.map((t) => (
-              <Card key={t.id} className="p-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1">
-                    <button className="text-left" onClick={() => setExpanded((e) => ({ ...e, [t.id]: !e[t.id] }))}>
-                      <div className="font-medium flex items-center gap-2">
-                        {t.title}
-                        <span className={`px-2 py-0.5 rounded text-xs capitalize ${priorityCls(t.priority)}`}>{t.priority}</span>
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
-                        {t.dueDate && <span>Due {format(new Date(t.dueDate), "PPP")}</span>}
-                      </div>
-                      {expanded[t.id] && t.description && (
-                        <div className="text-sm text-muted-foreground mt-2">{t.description}</div>
-                      )}
-                    </button>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Select value={t.status ?? "todo"} onValueChange={(v) => changeStatus(t.id, v as any)}>
-                      <SelectTrigger className="h-8 w-[140px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="todo">To Do</SelectItem>
-                        <SelectItem value="in-progress">In Progress</SelectItem>
-                        <SelectItem value="completed">Completed</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        setEditTask(t);
-                        setEditTitle(t.title);
-                        setEditDescription(t.description || "");
-                        setEditPriority(t.priority);
-                        setEditDueDate(t.dueDate ? new Date(t.dueDate) : undefined);
-                        setEditStatus(t.status ?? "todo");
-                        setEditOpen(true);
-                      }}
-                      aria-label="Edit task"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => removeTask(t.id)} aria-label="Delete task">
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            ))}
-            {groups.todo.length === 0 && <div className="text-muted-foreground text-sm">No tasks.</div>}
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="in-progress">
-          <Card className="p-4 space-y-2">
-            <div className="font-semibold">In Progress</div>
-            {groups.inprogress.map((t) => (
-              <Card key={t.id} className="p-3 flex items-start justify-between gap-3">
-                <div className="flex items-start gap-3">
-                  <Checkbox checked={t.completed} onCheckedChange={() => toggleTask(t.id)} />
-                  <div>
-                    <button className="text-left" onClick={() => setExpanded((e) => ({ ...e, [t.id]: !e[t.id] }))}>
-                      <div className="font-medium flex items-center gap-2">{t.title}<span className={`px-2 py-0.5 rounded text-xs capitalize ${priorityCls(t.priority)}`}>{t.priority}</span></div>
-                      <div className="text-xs text-muted-foreground mt-1">{t.dueDate ? `Due ${format(new Date(t.dueDate), "PPP")}` : ""}</div>
-                      {expanded[t.id] && t.description && (
-                        <div className="text-sm text-muted-foreground mt-2">{t.description}</div>
-                      )}
-                    </button>
-                  </div>
+      {/* Sections instead of tabs */}
+      <section aria-labelledby="todo-heading">
+        <Card className="p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 id="todo-heading" className="font-semibold">To Do</h2>
+            {groups.todo.length > 5 && (
+              <Button variant="ghost" size="sm" onClick={() => setShowMore((s) => ({ ...s, todo: !s.todo }))}>
+                {showMore.todo ? "Show less" : `Show ${groups.todo.length - 5} more`}
+                <ChevronDown className={`ml-1 h-4 w-4 transition-transform ${showMore.todo ? "rotate-180" : "rotate-0"}`} />
+              </Button>
+            )}
+          </div>
+          {(showMore.todo ? groups.todo : groups.todo.slice(0, 5)).map((t) => (
+            <Card key={t.id} className="p-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3 flex-1">
+                  <Checkbox checked={t.completed} onCheckedChange={() => toggleTask(t.id)} aria-label="Toggle complete" />
+                  <button className="text-left flex-1" onClick={() => setExpanded((e) => ({ ...e, [t.id]: !e[t.id] }))}>
+                    <div className={`font-medium flex items-center gap-2 ${t.completed ? "line-through text-muted-foreground" : ""}`}>
+                      {t.title}
+                      <span className={`px-2 py-0.5 rounded text-xs capitalize ${priorityCls(t.priority)}`}>{t.priority}</span>
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
+                      {t.dueDate && <span>Due {format(new Date(t.dueDate), "PPP")}</span>}
+                    </div>
+                    {expanded[t.id] && t.description && (
+                      <div className="text-sm text-muted-foreground mt-2">{t.description}</div>
+                    )}
+                  </button>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Select value={t.status ?? "in-progress"} onValueChange={(v) => changeStatus(t.id, v as any)}>
+                  <Select value={t.status ?? "todo"} onValueChange={(v) => changeStatus(t.id, v as any)}>
                     <SelectTrigger className="h-8 w-[140px]">
                       <SelectValue />
                     </SelectTrigger>
@@ -180,7 +133,7 @@ export default function TasksPage() {
                       setEditDescription(t.description || "");
                       setEditPriority(t.priority);
                       setEditDueDate(t.dueDate ? new Date(t.dueDate) : undefined);
-                      setEditStatus(t.status ?? "in-progress");
+                      setEditStatus(t.status ?? "todo");
                       setEditOpen(true);
                     }}
                     aria-label="Edit task"
@@ -191,57 +144,127 @@ export default function TasksPage() {
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
                 </div>
-              </Card>
-            ))}
-            {groups.inprogress.length === 0 && <div className="text-muted-foreground text-sm">Nothing here.</div>}
-          </Card>
-        </TabsContent>
+              </div>
+            </Card>
+          ))}
+          {groups.todo.length === 0 && <div className="text-muted-foreground text-sm">No tasks.</div>}
+        </Card>
+      </section>
 
-        <TabsContent value="completed">
-          <Card className="p-4 space-y-2">
-            <div className="font-semibold">Completed</div>
-            {groups.completed.map((t) => (
-              <Card key={t.id} className="p-3 flex items-start justify-between gap-3 opacity-90">
+      <section aria-labelledby="inprogress-heading">
+        <Card className="p-4 space-y-3 mt-6">
+          <div className="flex items-center justify-between">
+            <h2 id="inprogress-heading" className="font-semibold">In Progress</h2>
+            {groups.inprogress.length > 5 && (
+              <Button variant="ghost" size="sm" onClick={() => setShowMore((s) => ({ ...s, inprogress: !s.inprogress }))}>
+                {showMore.inprogress ? "Show less" : `Show ${groups.inprogress.length - 5} more`}
+                <ChevronDown className={`ml-1 h-4 w-4 transition-transform ${showMore.inprogress ? "rotate-180" : "rotate-0"}`} />
+              </Button>
+            )}
+          </div>
+          {(showMore.inprogress ? groups.inprogress : groups.inprogress.slice(0, 5)).map((t) => (
+            <Card key={t.id} className="p-3 flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <Checkbox checked={t.completed} onCheckedChange={() => toggleTask(t.id)} aria-label="Toggle complete" />
                 <div>
                   <button className="text-left" onClick={() => setExpanded((e) => ({ ...e, [t.id]: !e[t.id] }))}>
-                    <div className="font-medium flex items-center gap-2">
-                      {t.title}
-                      <Badge variant="secondary">Completed</Badge>
-                      <span className={`px-2 py-0.5 rounded text-xs capitalize ${priorityCls(t.priority)}`}>{t.priority}</span>
-                    </div>
+                    <div className={`font-medium flex items-center gap-2 ${t.completed ? "line-through text-muted-foreground" : ""}`}>{t.title}<span className={`px-2 py-0.5 rounded text-xs capitalize ${priorityCls(t.priority)}`}>{t.priority}</span></div>
                     <div className="text-xs text-muted-foreground mt-1">{t.dueDate ? `Due ${format(new Date(t.dueDate), "PPP")}` : ""}</div>
                     {expanded[t.id] && t.description && (
                       <div className="text-sm text-muted-foreground mt-2">{t.description}</div>
                     )}
                   </button>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => {
-                      setEditTask(t);
-                      setEditTitle(t.title);
-                      setEditDescription(t.description || "");
-                      setEditPriority(t.priority);
-                      setEditDueDate(t.dueDate ? new Date(t.dueDate) : undefined);
-                      setEditStatus(t.status ?? "completed");
-                      setEditOpen(true);
-                    }}
-                    aria-label="Edit task"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => removeTask(t.id)} aria-label="Delete task">
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </div>
-              </Card>
-            ))}
-            {groups.completed.length === 0 && <div className="text-muted-foreground text-sm">No completed tasks.</div>}
-          </Card>
-        </TabsContent>
-      </Tabs>
+              </div>
+              <div className="flex items-center gap-2">
+                <Select value={t.status ?? "in-progress"} onValueChange={(v) => changeStatus(t.id, v as any)}>
+                  <SelectTrigger className="h-8 w-[140px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todo">To Do</SelectItem>
+                    <SelectItem value="in-progress">In Progress</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    setEditTask(t);
+                    setEditTitle(t.title);
+                    setEditDescription(t.description || "");
+                    setEditPriority(t.priority);
+                    setEditDueDate(t.dueDate ? new Date(t.dueDate) : undefined);
+                    setEditStatus(t.status ?? "in-progress");
+                    setEditOpen(true);
+                  }}
+                  aria-label="Edit task"
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => removeTask(t.id)} aria-label="Delete task">
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </div>
+            </Card>
+          ))}
+          {groups.inprogress.length === 0 && <div className="text-muted-foreground text-sm">Nothing here.</div>}
+        </Card>
+      </section>
+
+      <section aria-labelledby="completed-heading">
+        <Card className="p-4 space-y-3 mt-6">
+          <div className="flex items-center justify-between">
+            <h2 id="completed-heading" className="font-semibold">Completed</h2>
+            {groups.completed.length > 5 && (
+              <Button variant="ghost" size="sm" onClick={() => setShowMore((s) => ({ ...s, completed: !s.completed }))}>
+                {showMore.completed ? "Show less" : `Show ${groups.completed.length - 5} more`}
+                <ChevronDown className={`ml-1 h-4 w-4 transition-transform ${showMore.completed ? "rotate-180" : "rotate-0"}`} />
+              </Button>
+            )}
+          </div>
+          {(showMore.completed ? groups.completed : groups.completed.slice(0, 5)).map((t) => (
+            <Card key={t.id} className="p-3 flex items-start justify-between gap-3 opacity-90">
+              <div>
+                <button className="text-left" onClick={() => setExpanded((e) => ({ ...e, [t.id]: !e[t.id] }))}>
+                  <div className="font-medium flex items-center gap-2 line-through text-muted-foreground">
+                    {t.title}
+                    <Badge variant="secondary">Completed</Badge>
+                    <span className={`px-2 py-0.5 rounded text-xs capitalize ${priorityCls(t.priority)}`}>{t.priority}</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">{t.dueDate ? `Due ${format(new Date(t.dueDate), "PPP")}` : ""}</div>
+                  {expanded[t.id] && t.description && (
+                    <div className="text-sm text-muted-foreground mt-2">{t.description}</div>
+                  )}
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    setEditTask(t);
+                    setEditTitle(t.title);
+                    setEditDescription(t.description || "");
+                    setEditPriority(t.priority);
+                    setEditDueDate(t.dueDate ? new Date(t.dueDate) : undefined);
+                    setEditStatus(t.status ?? "completed");
+                    setEditOpen(true);
+                  }}
+                  aria-label="Edit task"
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => removeTask(t.id)} aria-label="Delete task">
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </div>
+            </Card>
+          ))}
+          {groups.completed.length === 0 && <div className="text-muted-foreground text-sm">No completed tasks.</div>}
+        </Card>
+      </section>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
