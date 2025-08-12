@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useData, Task } from "@/context/DataContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -15,7 +15,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { Trash2, Pencil, Calendar as CalendarIcon, ChevronDown } from "lucide-react";
 export default function TasksPage() {
-  const { tasksForSelected, addTask, toggleTask, removeTask, currentBusiness, updateTask } = useData();
+  const { tasksForSelected, addTask, removeTask, currentBusiness, updateTask } = useData();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -99,7 +99,6 @@ export default function TasksPage() {
             <Card key={t.id} className="p-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3 flex-1">
-                  <Checkbox checked={t.completed} onCheckedChange={() => toggleTask(t.id)} aria-label="Toggle complete" />
                   <button className="text-left flex-1" onClick={() => setExpanded((e) => ({ ...e, [t.id]: !e[t.id] }))}>
                     <div className={`font-medium flex items-center gap-2 ${t.completed ? "line-through text-muted-foreground" : ""}`}>
                       {t.title}
@@ -114,16 +113,14 @@ export default function TasksPage() {
                   </button>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Select value={t.status ?? "todo"} onValueChange={(v) => changeStatus(t.id, v as any)}>
-                    <SelectTrigger className="h-8 w-[140px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="todo">To Do</SelectItem>
-                      <SelectItem value="in-progress">In Progress</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => changeStatus(t.id, "in-progress")}
+                    aria-label="Begin task"
+                  >
+                    Begin
+                  </Button>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -169,7 +166,6 @@ export default function TasksPage() {
           {(showMore.inprogress ? groups.inprogress : groups.inprogress.slice(0, 5)).map((t) => (
             <Card key={t.id} className="p-3 flex items-start justify-between gap-3">
               <div className="flex items-start gap-3">
-                <Checkbox checked={t.completed} onCheckedChange={() => toggleTask(t.id)} aria-label="Toggle complete" />
                 <div>
                   <button className="text-left" onClick={() => setExpanded((e) => ({ ...e, [t.id]: !e[t.id] }))}>
                     <div className={`font-medium flex items-center gap-2 ${t.completed ? "line-through text-muted-foreground" : ""}`}>{t.title}<span className={`px-2 py-0.5 rounded text-xs capitalize ${priorityCls(t.priority)}`}>{t.priority}</span></div>
@@ -181,16 +177,14 @@ export default function TasksPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Select value={t.status ?? "in-progress"} onValueChange={(v) => changeStatus(t.id, v as any)}>
-                  <SelectTrigger className="h-8 w-[140px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="todo">To Do</SelectItem>
-                    <SelectItem value="in-progress">In Progress</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => changeStatus(t.id, "completed")}
+                  aria-label="Finish task"
+                >
+                  Finish
+                </Button>
                 <Button
                   variant="ghost"
                   size="icon"

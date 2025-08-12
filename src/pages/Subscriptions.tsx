@@ -85,10 +85,11 @@ export default function SubscriptionsPage() {
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                      <SelectItem value="yearly">Yearly</SelectItem>
-                    </SelectContent>
+                     <SelectContent>
+                       <SelectItem value="monthly">Monthly</SelectItem>
+                       <SelectItem value="quarterly">Quarterly</SelectItem>
+                       <SelectItem value="yearly">Yearly</SelectItem>
+                     </SelectContent>
                   </Select>
                 </div>
               </div>
@@ -153,10 +154,11 @@ export default function SubscriptionsPage() {
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="monthly">Monthly</SelectItem>
-                        <SelectItem value="yearly">Yearly</SelectItem>
-                      </SelectContent>
+                       <SelectContent>
+                         <SelectItem value="monthly">Monthly</SelectItem>
+                         <SelectItem value="quarterly">Quarterly</SelectItem>
+                         <SelectItem value="yearly">Yearly</SelectItem>
+                       </SelectContent>
                     </Select>
                   </div>
                 </div>

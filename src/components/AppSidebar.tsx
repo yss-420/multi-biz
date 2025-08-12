@@ -27,7 +27,7 @@ export function AppSidebar() {
   const currentPath = location.pathname;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
     isActive
-      ? "bg-primary/15 text-foreground font-semibold border-l-2 border-primary"
+      ? "bg-primary/20 text-foreground font-semibold border-l-2 border-primary"
       : "hover:bg-muted/50";
 
   return (

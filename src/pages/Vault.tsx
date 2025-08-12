@@ -69,7 +69,9 @@ function VaultContent() {
             <Input value={newKey.secret} onChange={(e) => setNewKey({ ...newKey, secret: e.target.value })} />
           </div>
         </div>
-        <Button onClick={() => addApiKey(newKey)}>Save Key</Button>
+        <div className="flex justify-end">
+          <Button onClick={() => addApiKey(newKey)}>Save Key</Button>
+        </div>
       </Card>
 
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">

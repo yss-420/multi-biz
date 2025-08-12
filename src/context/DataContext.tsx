@@ -9,7 +9,7 @@ export type Subscription = {
   serviceName: string;
   cost: number;
   currency: string;
-  cycle: "monthly" | "yearly";
+  cycle: "monthly" | "quarterly" | "yearly";
   renewalDate: string; // ISO
   autoRenew: boolean;
   notes?: string;
