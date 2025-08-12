@@ -141,7 +141,9 @@ function TeamContent() {
             </Select>
           </div>
         </div>
-        <Button onClick={invite}>Invite</Button>
+<div className="flex justify-end">
+  <Button onClick={invite}>Invite</Button>
+</div>
       </Card>
 
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">

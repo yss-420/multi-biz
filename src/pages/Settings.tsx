@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Trash2 } from "lucide-react";
 
 export default function SettingsPage() {
   const { settings, currentBusiness, businesses, updateBusiness, removeBusiness } = useData();
@@ -104,6 +105,19 @@ export default function SettingsPage() {
               }}
             >
               Save changes
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Delete business"
+              onClick={() => {
+                if (!currentBusiness) return;
+                if (!confirm("Delete this business? This cannot be undone.")) return;
+                removeBusiness(currentBusiness.id);
+                toast({ title: "Business deleted" });
+              }}
+            >
+              <Trash2 className="h-4 w-4 text-destructive" />
             </Button>
           </div>
         </Card>

@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { Copy } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 function VaultContent() {
   const { apiKeys, removeApiKey, addApiKey, currentBusiness } = useData();
@@ -47,7 +48,7 @@ function VaultContent() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">API Vault <span className="text-base font-normal text-muted-foreground">({apiKeys.length})</span></h1>
+        <h1 className="text-3xl font-bold flex items-center gap-3">API Vault <Badge variant="secondary" className="text-xs">Total {apiKeys.length}</Badge></h1>
         <div className="flex items-center gap-3">
           <div className="grid grid-cols-3 gap-2"></div>
         </div>

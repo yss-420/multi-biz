@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, Fragment } from "react";
 import { useData, Subscription } from "@/context/DataContext";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -30,6 +30,7 @@ export default function SubscriptionsPage() {
 
   const [editOpen, setEditOpen] = useState(false);
   const [edit, setEdit] = useState<Subscription | null>(null);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   const startEdit = (s: Subscription) => {
     setEdit({ ...s });
@@ -207,22 +208,34 @@ export default function SubscriptionsPage() {
           </TableHeader>
           <TableBody>
             {subsForSelected.map((s) => (
-              <TableRow key={s.id}>
-                <TableCell className="font-medium">{s.serviceName}</TableCell>
-                <TableCell>
-                  {s.currency} {s.cost.toFixed(2)}
-                </TableCell>
-                <TableCell className="capitalize">{s.cycle}</TableCell>
-                <TableCell>{new Date(s.renewalDate).toLocaleDateString()}</TableCell>
-                <TableCell className="text-right">
-                  <Button variant="ghost" size="icon" aria-label="Edit" onClick={() => startEdit(s)}>
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" aria-label="Delete" onClick={() => removeSubscription(s.id)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </TableCell>
-              </TableRow>
+              <Fragment key={s.id}>
+                <TableRow
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => setExpanded((e) => ({ ...e, [s.id]: !e[s.id] }))}
+                >
+                  <TableCell className="font-medium">{s.serviceName}</TableCell>
+                  <TableCell>
+                    {s.currency} {s.cost.toFixed(2)}
+                  </TableCell>
+                  <TableCell className="capitalize">{s.cycle}</TableCell>
+                  <TableCell>{new Date(s.renewalDate).toLocaleDateString()}</TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="icon" aria-label="Edit" onClick={(e) => { e.stopPropagation(); startEdit(s); }}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" aria-label="Delete" onClick={(e) => { e.stopPropagation(); removeSubscription(s.id); }}>
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+                {expanded[s.id] && s.notes && (
+                  <TableRow className="bg-muted/30">
+                    <TableCell colSpan={5}>
+                      <div className="text-sm text-muted-foreground">{s.notes}</div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </Fragment>
             ))}
           </TableBody>
         </Table>

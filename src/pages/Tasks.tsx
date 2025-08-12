@@ -147,7 +147,11 @@ export default function TasksPage() {
               </div>
             </Card>
           ))}
-          {groups.todo.length === 0 && <div className="text-muted-foreground text-sm">No tasks.</div>}
+{groups.todo.length === 0 && (
+  <div className="flex items-center justify-center py-4">
+    <Button onClick={() => setOpen(true)}>Start new task</Button>
+  </div>
+)}
         </Card>
       </section>
 
