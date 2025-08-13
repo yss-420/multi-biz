@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { LayoutDashboard, CreditCard, Key, Users, CheckSquare, Settings } from "lucide-react";
 import {
   Sidebar,
@@ -23,12 +23,6 @@ const items = [
 
 export function AppSidebar() {
   const { state } = useSidebar();
-  const location = useLocation();
-  const currentPath = location.pathname;
-  const getNavCls = ({ isActive }: { isActive: boolean }) =>
-    isActive
-      ? "bg-primary/20 text-foreground font-semibold border-l-2 border-primary"
-      : "hover:bg-muted/50";
 
   return (
     <Sidebar collapsible="icon">
@@ -40,7 +34,15 @@ export function AppSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink to={item.url} end className={getNavCls}>
+                    <NavLink 
+                      to={item.url} 
+                      end 
+                      className={({ isActive }) =>
+                        isActive
+                          ? "bg-primary/20 text-primary font-semibold border-l-4 border-primary"
+                          : "hover:bg-muted/50 text-muted-foreground hover:text-foreground"
+                      }
+                    >
                       <item.icon className="mr-2 h-4 w-4" />
                       {state !== "collapsed" && <span>{item.title}</span>}
                     </NavLink>
