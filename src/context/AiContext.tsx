@@ -31,7 +31,12 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     setIsLoading(true);
     try {
       const data = await aiChat(msgs);
-      const text = data?.choices?.[0]?.message?.content || "";
+      const choice = data?.choices?.[0] || {};
+      const text =
+        choice?.message?.content ??
+        choice?.delta?.content ??
+        choice?.text ??
+        "";
       setMessages((m) => [...m, { role: "user", content: input }, { role: "assistant", content: text }]);
     } catch (err: any) {
       const message = typeof err?.message === "string" ? err.message : "Unknown error";

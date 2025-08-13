@@ -17,6 +17,9 @@ if (!OPENROUTER_API_KEY) {
 
 app.post("/chat/completions", async (req, res) => {
   try {
+    if (!OPENROUTER_API_KEY) {
+      return res.status(500).json({ error: "Missing OPENROUTER_API_KEY on server" });
+    }
     const { model, messages, temperature, max_tokens } = req.body || {};
     const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -24,16 +27,20 @@ app.post("/chat/completions", async (req, res) => {
         Authorization: `Bearer ${OPENROUTER_API_KEY}`,
         "HTTP-Referer": process.env.OPENROUTER_SITE_URL || "http://localhost:8080",
         "X-Title": process.env.OPENROUTER_SITE_TITLE || "MultiBiz",
+        Referer: process.env.OPENROUTER_SITE_URL || "http://localhost:8080",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         model: model || "qwen/qwen3-4b:free",
-        messages: messages || [],
+        messages: messages && Array.isArray(messages) && messages.length ? messages : [{ role: "user", content: "Hello" }],
         temperature: temperature ?? 0.7,
         max_tokens,
       }),
     });
     const text = await r.text();
+    if (!r.ok) {
+      console.error("[AI] Upstream error", r.status, text);
+    }
     let json;
     try {
       json = JSON.parse(text);
