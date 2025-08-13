@@ -60,6 +60,25 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## AI (OpenRouter) – Development setup
+
+- A lightweight proxy server will run at http://localhost:8787 to protect your OpenRouter API key.
+- Frontend calls `/api/ai/...`, which is proxied to the local server during development.
+
+Run both dev servers:
+
+```sh
+npm run dev:full
+```
+
+Set your key in an `.env` file at the project root:
+
+```
+OPENROUTER_API_KEY=sk-or-...
+OPENROUTER_SITE_URL=http://localhost:8080
+OPENROUTER_SITE_TITLE=MultiBiz
+```
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/7508a1db-213e-4401-9d89-a58d050a1c5e) and click on Share -> Publish.

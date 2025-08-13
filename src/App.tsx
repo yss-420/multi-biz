@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import AppLayout from "./layouts/AppLayout";
 import { AuthProvider, RequireAuth } from "./context/AuthContext";
 import { DataProvider } from "./context/DataContext";
+import { AiProvider } from "./context/AiContext";
+import AiChat from "./components/AiChat";
 import Dashboard from "./pages/Dashboard";
 import SubscriptionsPage from "./pages/Subscriptions";
 import TasksPage from "./pages/Tasks";
@@ -26,6 +28,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <DataProvider>
+            <AiProvider>
             <Routes>
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
@@ -52,6 +55,8 @@ const App = () => (
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <AiChat />
+            </AiProvider>
           </DataProvider>
         </AuthProvider>
       </BrowserRouter>
