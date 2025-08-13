@@ -1,5 +1,12 @@
-import { NavLink } from "react-router-dom";
-import { LayoutDashboard, CreditCard, Key, Users, CheckSquare, Settings } from "lucide-react";
+import { NavLink, useLocation } from "react-router-dom";
+import {
+  LayoutDashboard,
+  CreditCard,
+  Key,
+  Users,
+  CheckSquare,
+  Settings,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -23,6 +30,7 @@ const items = [
 
 export function AppSidebar() {
   const { state } = useSidebar();
+  const location = useLocation();
 
   return (
     <Sidebar collapsible="icon">
@@ -31,24 +39,25 @@ export function AppSidebar() {
           <SidebarGroupLabel className="text-base md:text-lg font-semibold tracking-tight">MultiBiz</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink 
-                      to={item.url} 
-                      end 
-                      className={({ isActive }) =>
-                        isActive
-                          ? "bg-primary/30 text-primary font-bold border-l-4 border-primary shadow-sm"
-                          : "hover:bg-muted/50 text-muted-foreground hover:text-foreground"
-                      }
+              {items.map((item) => {
+                const isActive =
+                  location.pathname === item.url ||
+                  location.pathname.startsWith(item.url + "/");
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      className="data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground data-[active=true]:font-semibold data-[active=true]:shadow-sm data-[active=true]:border-l-4 data-[active=true]:border-sidebar-primary"
                     >
-                      <item.icon className="mr-2 h-4 w-4" />
-                      {state !== "collapsed" && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+                      <NavLink to={item.url} end>
+                        <item.icon className="mr-2 h-4 w-4" />
+                        {state !== "collapsed" && <span>{item.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
