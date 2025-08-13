@@ -33,6 +33,13 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const data = await aiChat(msgs);
       const text = data?.choices?.[0]?.message?.content || "";
       setMessages((m) => [...m, { role: "user", content: input }, { role: "assistant", content: text }]);
+    } catch (err: any) {
+      const message = typeof err?.message === "string" ? err.message : "Unknown error";
+      setMessages((m) => [
+        ...m,
+        { role: "user", content: input },
+        { role: "assistant", content: `Sorry, I couldn't complete the request (${message}). Ensure the AI proxy is running and the API key is set.` },
+      ]);
     } finally {
       setIsLoading(false);
     }

@@ -33,8 +33,14 @@ app.post("/chat/completions", async (req, res) => {
         max_tokens,
       }),
     });
-    const data = await r.json();
-    res.status(r.status).json(data);
+    const text = await r.text();
+    let json;
+    try {
+      json = JSON.parse(text);
+    } catch {
+      json = { error: "Invalid JSON from OpenRouter", raw: text };
+    }
+    res.status(r.status).json(json);
   } catch (e) {
     console.error("/chat/completions error", e);
     res.status(500).json({ error: "AI proxy failure" });

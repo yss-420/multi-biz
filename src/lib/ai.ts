@@ -10,8 +10,13 @@ export async function aiChat(messages: ChatMessage[], options?: { model?: string
       temperature: options?.temperature ?? 0.7,
     }),
   });
-  if (!res.ok) throw new Error(`AI error: ${res.status}`);
-  return res.json();
+  const text = await res.text();
+  if (!res.ok) {
+    let message = `AI error: ${res.status}`;
+    try { const j = JSON.parse(text); message = j?.error || message; } catch {}
+    throw new Error(message);
+  }
+  try { return JSON.parse(text); } catch { return { error: "Invalid JSON", raw: text }; }
 }
 
 export function buildTaskContext(params: {
