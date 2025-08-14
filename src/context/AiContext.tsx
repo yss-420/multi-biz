@@ -21,7 +21,15 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const baseSystem: ChatMessage = useMemo(() => (
     {
       role: "system",
-      content: "You are MultiBiz AI, a helpful operations copilot. Return concise answers. When proposing tasks, prefer a short actionable list."
+      content:
+        [
+          "You are MultiBiz AI, an operations copilot.",
+          "- Always format responses using clean Markdown (headings, lists, code blocks).",
+          "- Never echo the user's prompt unless asked.",
+          "- When summarizing: use a heading and bullet points.",
+          "- When returning tasks programmatically, return a compact JSON object under `tasks` only (no extra text).",
+          "- Dates: prefer YYYY-MM-DD.",
+        ].join("\n")
     }
   ), []);
 
