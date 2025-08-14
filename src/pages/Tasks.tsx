@@ -14,8 +14,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { Trash2, Pencil, Calendar as CalendarIcon, ChevronDown } from "lucide-react";
+import { useAi } from "@/context/AiContext";
 export default function TasksPage() {
   const { tasksForSelected, addTask, removeTask, currentBusiness, updateTask } = useData();
+  const { generateTasksFromGoal } = useAi();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -35,6 +37,8 @@ export default function TasksPage() {
   const [editPriority, setEditPriority] = useState<Task["priority"]>("medium");
   const [editDueDate, setEditDueDate] = useState<Date | undefined>(undefined);
   const [editStatus, setEditStatus] = useState<Task["status"]>("todo");
+  const [assistOpen, setAssistOpen] = useState(false);
+  const [assistGoal, setAssistGoal] = useState("");
 
   useEffect(() => {
     document.title = `Tasks – ${currentBusiness?.name ?? "MultiBiz"}`;
@@ -80,7 +84,10 @@ export default function TasksPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Tasks</h1>
-        <Button onClick={() => setOpen(true)}>Create Task</Button>
+        <div className="flex gap-2">
+          <Button variant="secondary" onClick={() => setAssistOpen(true)}>AI Assist</Button>
+          <Button onClick={() => setOpen(true)}>Create Task</Button>
+        </div>
       </div>
 
       {/* Sections instead of tabs */}
@@ -403,6 +410,32 @@ export default function TasksPage() {
               }}
             >
               Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={assistOpen} onOpenChange={setAssistOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>AI Assist: Suggest tasks</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="grid gap-1">
+              <Label>Goal</Label>
+              <Input value={assistGoal} onChange={(e) => setAssistGoal(e.target.value)} placeholder="e.g., Ship onboarding flow" />
+            </div>
+            <div className="text-xs text-muted-foreground">The assistant will suggest concise tasks. You can copy and add them manually for now.</div>
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={async () => {
+                if (!assistGoal.trim()) return;
+                await generateTasksFromGoal(assistGoal.trim());
+                setAssistOpen(false);
+              }}
+            >
+              Ask AI
             </Button>
           </DialogFooter>
         </DialogContent>

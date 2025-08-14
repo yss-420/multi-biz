@@ -49,6 +49,8 @@ export type TeamMember = {
 
 export type Settings = {
   reminderDays: number[]; // e.g., [3,1]
+  aiTemperature?: number;
+  aiMaxTokens?: number;
 };
 
 export type DataState = {
@@ -83,6 +85,7 @@ type DataContextValue = DataState & {
   subsForSelected: Subscription[];
   tasksForSelected: Task[];
   upcomingRenewals: () => Subscription[];
+  updateSettings: (patch: Partial<Settings>) => void;
 };
 
 const DataContext = createContext<DataContextValue | undefined>(undefined);
@@ -148,7 +151,7 @@ const initialState = (): DataState => {
     team: [
       { id: uid(), name: "Manav", email: "you@example.com", assignedBusinessIds: [biz1.id], status: "active" },
     ],
-    settings: { reminderDays: [3, 1] },
+    settings: { reminderDays: [3, 1], aiTemperature: 0.2, aiMaxTokens: 384 },
   };
 };
 
@@ -252,6 +255,9 @@ const removeTeamMember = (memberId: ID) =>
         .slice(0, 5);
     };
 
+    const updateSettings = (patch: Partial<Settings>) =>
+      setState((st) => ({ ...st, settings: { ...st.settings, ...patch } }));
+
 return {
   ...state,
   selectBusiness,
@@ -275,6 +281,7 @@ return {
   subsForSelected,
   tasksForSelected,
   upcomingRenewals,
+  updateSettings,
 };
   }, [state]);
 

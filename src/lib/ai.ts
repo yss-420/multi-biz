@@ -1,13 +1,16 @@
 export type ChatMessage = { role: "system" | "user" | "assistant"; content: string };
 
-export async function aiChat(messages: ChatMessage[], options?: { model?: string; temperature?: number }) {
+export async function aiChat(
+  messages: ChatMessage[],
+  options?: { model?: string; temperature?: number; max_tokens?: number }
+) {
   const res = await fetch("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       messages,
       temperature: options?.temperature ?? 0.2,
-      max_tokens: 384,
+      max_tokens: options?.max_tokens ?? 384,
     }),
   });
   const text = await res.text();

@@ -38,7 +38,7 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     modelText: string,
     options?: { temperature?: number; retryModelText?: string }
   ): Promise<string> => {
-    if (isLoading) return; // prevent double-trigger
+    if (isLoading) return ""; // prevent double-trigger
     const ctx = buildTaskContext({ businessName: currentBusiness?.name, tasks: tasksForSelected });
     const msgs: ChatMessage[] = [
       baseSystem,
@@ -47,7 +47,8 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     ];
     setIsLoading(true);
     try {
-      const data = await aiChat(msgs, { temperature: options?.temperature });
+      const temp = options?.temperature ?? 0.2;
+      const data = await aiChat(msgs, { temperature: temp });
       const choice = data?.choices?.[0] || {};
       let text =
         choice?.message?.content ??
