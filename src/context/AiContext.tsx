@@ -32,7 +32,11 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   ), []);
 
-  const askInternal = async (displayText: string, modelText: string, options?: { temperature?: number }) => {
+  const askInternal = async (
+    displayText: string,
+    modelText: string,
+    options?: { temperature?: number; retryModelText?: string }
+  ) => {
     if (isLoading) return; // prevent double-trigger
     const ctx = buildTaskContext({ businessName: currentBusiness?.name, tasks: tasksForSelected });
     const msgs: ChatMessage[] = [
@@ -44,11 +48,19 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     try {
       const data = await aiChat(msgs, { temperature: options?.temperature });
       const choice = data?.choices?.[0] || {};
-      const text =
+      let text =
         choice?.message?.content ??
         choice?.delta?.content ??
         choice?.text ??
         "";
+      if (!text || text.trim().length < 3) {
+        // One automatic retry with a simplified prompt
+        const retry = options?.retryModelText || modelText;
+        const retryMsgs: ChatMessage[] = [baseSystem, { role: "system", content: ctx }, { role: "user", content: retry }];
+        const data2 = await aiChat(retryMsgs, { temperature: options?.temperature ?? 0.2 });
+        const c2 = data2?.choices?.[0] || {};
+        text = c2?.message?.content ?? c2?.delta?.content ?? c2?.text ?? "";
+      }
       setMessages((m) => [...m, { role: "user", content: displayText }, { role: "assistant", content: text }]);
     } catch (err: any) {
       const message = typeof err?.message === "string" ? err.message : "Unknown error";
@@ -71,17 +83,20 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       "Output EXACTLY this structure with new lines and nothing else: \n" +
       "Current tasks:\n1) <task one>\n2) <task two>\n\nNext steps:\n1) <step one>\n2) <step two>\n3) <step three>" +
       "\nUse short phrases. Do not echo the prompt.";
-    await askInternal(display, model, { temperature: 0.1 });
+    const retry =
+      "Provide only the two-line 'Current tasks' and three-line 'Next steps' sections, each on separate lines as specified. No preamble.";
+    await askInternal(display, model, { temperature: 0.1, retryModelText: retry });
     return display;
   };
 
   const generateTasksFromGoal = async (goal: string) => {
     const display = `Suggest tasks to achieve: ${goal}`;
     const model =
-      `Propose 3-7 concrete tasks to achieve this goal: "${goal}". ` +
-      `Respond as a concise numbered list, one task per line. ` +
+      `Propose 5 concrete tasks to achieve this goal: "${goal}". ` +
+      `Respond as a concise numbered list (1. ... up to 5.), one task per line. ` +
       `Do not include code, JSON, or repeat the goal.`;
-    await askInternal(display, model);
+    const retry = `Return exactly five numbered lines (1. to 5.) with concise tasks. No extra text.`;
+    await askInternal(display, model, { temperature: 0.2, retryModelText: retry });
     return display;
   };
 
