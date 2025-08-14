@@ -67,15 +67,19 @@ export default function SubscriptionsPage() {
           <Button
             variant="secondary"
             onClick={async () => {
-              const res = await analyzeSubscriptions();
-              setAiSummary(res.summary);
-              setAiTasks(res.suggestions);
-              setAiOpen(true);
+              try {
+                const res = await analyzeSubscriptions();
+                setAiSummary(res.summary);
+                setAiTasks(res.suggestions);
+                setAiOpen(true);
+              } catch (e) {
+                console.error("Analyze subscriptions failed", e);
+              }
             }}
           >
             Analyze subscriptions
           </Button>
-        <Dialog open={open} onOpenChange={setOpen}>
+          <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button>Add Subscription</Button>
           </DialogTrigger>
@@ -145,6 +149,8 @@ export default function SubscriptionsPage() {
           </DialogContent>
           </Dialog>
         </div>
+
+      </div>
 
         {edit && (
           <Dialog open={editOpen} onOpenChange={setEditOpen}>
@@ -276,16 +282,7 @@ export default function SubscriptionsPage() {
                   ))}
                 </ul>
                 <div className="flex justify-end mt-3">
-                  <Button
-                    onClick={() => {
-                      if (!currentBusiness) return;
-                      // Minimal apply: add each suggested task for the current business
-                      const { addTask } = require("@/context/DataContext");
-                    }}
-                    disabled
-                  >
-                    Apply tasks (coming soon)
-                  </Button>
+                  <Button disabled>Apply tasks (coming soon)</Button>
                 </div>
               </div>
             )}

@@ -15,7 +15,7 @@ type AiContextValue = {
 const AiContext = createContext<AiContextValue | undefined>(undefined);
 
 export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { currentBusiness, tasksForSelected } = useData();
+  const { currentBusiness, tasksForSelected, subsForSelected } = useData();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -77,7 +77,7 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
-  const ask = async (input: string) => askInternal(input, input);
+  const ask = async (input: string): Promise<void> => { await askInternal(input, input); };
 
   const summarizeTasks = async () => {
     const display = "Summarize my current tasks and suggest the top 3 next steps.";
@@ -112,7 +112,6 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     summarizeTasks,
     generateTasksFromGoal,
     analyzeSubscriptions: async () => {
-      const { subsForSelected, currentBusiness } = useData();
       const subs = subsForSelected;
       const upcoming = subs
         .filter((s) => {
