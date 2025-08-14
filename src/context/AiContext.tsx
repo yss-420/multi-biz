@@ -128,7 +128,11 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         `Provide a brief plain-text summary and then propose up to 5 actionable tasks in this JSON shape only: {"tasks":[{"title":"...","description":"...","priority":"low|medium|high","dueDate":"YYYY-MM-DD"}]}.`;
       const reply = await askInternal(display, model, { temperature: 0.2 });
       const suggestions = parseSuggestedTasksFromText(reply);
-      return { summary: reply, suggestions };
+      const fallback = upcoming
+        ? `Upcoming renewals (30 days):\n${upcoming}`
+        : "No renewals in the next 30 days.";
+      const summary = reply && reply.trim().length > 0 ? reply : fallback;
+      return { summary, suggestions };
     },
     clear,
   };

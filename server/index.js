@@ -45,10 +45,9 @@ app.post("/chat", async (req, res) => {
       if (status >= 200 && status < 300 && !json?.error) {
         return res.status(200).json(json);
       }
-      lastError = { status, json, raw };
-      // Retry only on 429/5xx
-      if (status === 429 || status >= 500) continue;
-      break;
+      lastError = { status, json, raw, model };
+      // Try next model on any non-2xx or provider error
+      continue;
     }
     console.error("/chat failed", lastError?.status, lastError?.json || lastError?.raw);
     res.status(502).json({ error: "All models failed", details: lastError });
