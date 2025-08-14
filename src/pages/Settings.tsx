@@ -11,10 +11,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Trash2 } from "lucide-react";
 
 export default function SettingsPage() {
-  const { settings, currentBusiness, businesses, updateBusiness, removeBusiness } = useData();
+  const { settings, currentBusiness, businesses, updateBusiness, removeBusiness, updateSettings } = useData();
   const { user, changePassword, requirePasswordCheck } = useAuth();
   const { toast } = useToast();
   const [days, setDays] = useState<number[]>(settings.reminderDays);
+  const [aiTemp, setAiTemp] = useState<number>(settings.aiTemperature ?? 0.2);
+  const [aiMax, setAiMax] = useState<number>(settings.aiMaxTokens ?? 384);
 
   const [currentPwd, setCurrentPwd] = useState("");
   const [newPwd, setNewPwd] = useState("");
@@ -61,6 +63,23 @@ export default function SettingsPage() {
           ))}
         </div>
         <div className="text-xs text-muted-foreground">Demo only – not persisted separately.</div>
+      </Card>
+
+      <Card className="p-4 space-y-3">
+        <div className="font-semibold">AI Settings</div>
+        <div className="grid md:grid-cols-3 gap-3">
+          <div className="grid gap-1">
+            <Label>Temperature</Label>
+            <Input type="number" step="0.1" value={aiTemp} onChange={(e) => setAiTemp(Number(e.target.value))} />
+          </div>
+          <div className="grid gap-1">
+            <Label>Max tokens</Label>
+            <Input type="number" value={aiMax} onChange={(e) => setAiMax(Number(e.target.value))} />
+          </div>
+        </div>
+        <div className="flex justify-end">
+          <Button onClick={() => { updateSettings({ aiTemperature: aiTemp, aiMaxTokens: aiMax }); toast({ title: "AI settings saved" }); }}>Save</Button>
+        </div>
       </Card>
 
       {user?.role === "owner" && (
