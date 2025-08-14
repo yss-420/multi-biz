@@ -7,8 +7,10 @@ type AiContextValue = {
   isLoading: boolean;
   ask: (input: string) => Promise<void>;
   summarizeTasks: () => Promise<string>;
-  generateTasksFromGoal: (goal: string) => Promise<unknown>;
+  generateTasksFromGoal: (goal: string) => Promise<{ text: string; suggestions: SuggestedTask[] }>;
   analyzeSubscriptions: () => Promise<{ summary: string; suggestions: SuggestedTask[] }>;
+  refineTask: (title: string, description?: string) => Promise<{ title?: string; description?: string }>;
+  splitTask: (title: string, description?: string) => Promise<SuggestedTask[]>;
   clear: () => void;
 };
 
@@ -100,8 +102,9 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       `Respond as a concise numbered list (1. ... up to 5.), one task per line. ` +
       `Do not include code, JSON, or repeat the goal.`;
     const retry = `Return exactly five numbered lines (1. to 5.) with concise tasks. No extra text.`;
-    await askInternal(display, model, { temperature: 0.2, retryModelText: retry });
-    return display;
+    const text = await askInternal(display, model, { temperature: 0.2, retryModelText: retry });
+    const suggestions = parseSuggestedTasksFromText(text);
+    return { text, suggestions };
   };
 
   const clear = () => setMessages([]);
@@ -134,6 +137,29 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         : "No renewals in the next 30 days.";
       const summary = reply && reply.trim().length > 0 ? reply : fallback;
       return { summary, suggestions };
+    },
+    refineTask: async (title: string, description?: string) => {
+      const display = "Refine task title and description";
+      const model =
+        `Refine the following task title and description for clarity and brevity. Return ONLY JSON {"title":"...","description":"..."}.\n` +
+        `Title: ${title}\nDescription: ${description || ""}`;
+      const text = await askInternal(display, model, { temperature: 0.2 });
+      try {
+        const objMatch = text.match(/\{[\s\S]*\}/);
+        if (objMatch) {
+          const obj = JSON.parse(objMatch[0]);
+          return { title: typeof obj.title === "string" ? obj.title : undefined, description: typeof obj.description === "string" ? obj.description : undefined };
+        }
+      } catch {}
+      return {};
+    },
+    splitTask: async (title: string, description?: string) => {
+      const display = "Split task into subtasks";
+      const model =
+        `Split the following task into 3-7 concrete subtasks. Return ONLY JSON {"tasks":[{"title":"...","description":"..."}]}.\n` +
+        `Task: ${title}\nDetails: ${description || ""}`;
+      const text = await askInternal(display, model, { temperature: 0.2 });
+      return parseSuggestedTasksFromText(text);
     },
     clear,
   };

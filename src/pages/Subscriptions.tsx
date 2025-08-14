@@ -16,7 +16,7 @@ import { useAi } from "@/context/AiContext";
 import { Dialog as UIDialog, DialogContent as UIDialogContent, DialogHeader as UIDialogHeader, DialogTitle as UIDialogTitle } from "@/components/ui/dialog";
 
 export default function SubscriptionsPage() {
-  const { subsForSelected, addSubscription, updateSubscription, removeSubscription, currentBusiness } = useData();
+  const { subsForSelected, addSubscription, updateSubscription, removeSubscription, currentBusiness, addTask } = useData();
   const { analyzeSubscriptions } = useAi();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<Omit<Subscription, "id">>({
@@ -282,7 +282,25 @@ export default function SubscriptionsPage() {
                   ))}
                 </ul>
                 <div className="flex justify-end mt-3">
-                  <Button disabled>Apply tasks (coming soon)</Button>
+                  <Button
+                    onClick={() => {
+                      if (!currentBusiness) return;
+                      aiTasks.forEach((t) => {
+                        addTask({
+                          businessId: currentBusiness.id,
+                          title: t.title,
+                          description: t.description,
+                          priority: (t.priority as any) || "medium",
+                          completed: false,
+                          status: "todo",
+                          dueDate: t.dueDate,
+                        });
+                      });
+                      setAiOpen(false);
+                    }}
+                  >
+                    Apply tasks
+                  </Button>
                 </div>
               </div>
             )}

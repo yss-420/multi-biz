@@ -17,7 +17,7 @@ import { Trash2, Pencil, Calendar as CalendarIcon, ChevronDown } from "lucide-re
 import { useAi } from "@/context/AiContext";
 export default function TasksPage() {
   const { tasksForSelected, addTask, removeTask, currentBusiness, updateTask } = useData();
-  const { generateTasksFromGoal } = useAi();
+  const { generateTasksFromGoal, refineTask, splitTask } = useAi();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -411,6 +411,42 @@ export default function TasksPage() {
             >
               Save
             </Button>
+            <Button
+              variant="ghost"
+              onClick={async () => {
+                if (!editTask) return;
+                const refined = await refineTask(editTitle, editDescription);
+                if (refined.title || refined.description) {
+                  setEditTitle(refined.title || editTitle);
+                  setEditDescription(refined.description ?? editDescription);
+                }
+              }}
+            >
+              AI Refine
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={async () => {
+                if (!editTask) return;
+                const subs = await splitTask(editTitle, editDescription);
+                // For now, append subtasks as separate tasks with the same business
+                if (currentBusiness && subs && subs.length) {
+                  subs.forEach((st) => {
+                    addTask({
+                      businessId: currentBusiness.id,
+                      title: st.title,
+                      description: st.description,
+                      priority: (st.priority as any) || "medium",
+                      completed: false,
+                      status: "todo",
+                      dueDate: st.dueDate,
+                    });
+                  });
+                }
+              }}
+            >
+              Split into subtasks
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -428,10 +464,11 @@ export default function TasksPage() {
             <div className="text-xs text-muted-foreground">The assistant will suggest concise tasks. You can copy and add them manually for now.</div>
           </div>
           <DialogFooter>
-            <Button
+                <Button
               onClick={async () => {
                 if (!assistGoal.trim()) return;
-                await generateTasksFromGoal(assistGoal.trim());
+                const res = await generateTasksFromGoal(assistGoal.trim());
+                // Optional: we could immediately offer to apply; for now it goes to chat and can be copied.
                 setAssistOpen(false);
               }}
             >
@@ -440,6 +477,11 @@ export default function TasksPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Quick AI actions inside edit dialog footer */}
+      {editOpen && editTask && (
+        <div className="hidden" />
+      )}
     </div>
   );
 }
