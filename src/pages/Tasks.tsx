@@ -419,6 +419,9 @@ export default function TasksPage() {
                 if (refined.title || refined.description) {
                   setEditTitle(refined.title || editTitle);
                   setEditDescription(refined.description ?? editDescription);
+                } else {
+                  // minimal user feedback
+                  alert("AI couldn't refine this task. Try rephrasing your title/description.");
                 }
               }}
             >
@@ -442,6 +445,8 @@ export default function TasksPage() {
                       dueDate: st.dueDate,
                     });
                   });
+                } else {
+                  alert("AI couldn't produce subtasks. Try again with a clearer title/description.");
                 }
               }}
             >

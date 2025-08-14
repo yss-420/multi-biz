@@ -151,12 +151,18 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           return { title: typeof obj.title === "string" ? obj.title : undefined, description: typeof obj.description === "string" ? obj.description : undefined };
         }
       } catch {}
-      return {};
+      // Fallback: try to parse simple "Title: ..." and "Description: ..." lines
+      const tMatch = text.match(/title\s*:\s*(.+)/i);
+      const dMatch = text.match(/description\s*:\s*([\s\S]+)/i);
+      const out: { title?: string; description?: string } = {};
+      if (tMatch && tMatch[1]) out.title = tMatch[1].trim();
+      if (dMatch && dMatch[1]) out.description = dMatch[1].trim();
+      return out;
     },
     splitTask: async (title: string, description?: string) => {
       const display = "Split task into subtasks";
       const model =
-        `Split the following task into 3-7 concrete subtasks. Return ONLY JSON {"tasks":[{"title":"...","description":"..."}]}.\n` +
+        `Split the following task into 3-7 concrete subtasks. Prefer JSON under {"tasks":[{"title":"...","description":"..."}]}. If not, return numbered lines.\n` +
         `Task: ${title}\nDetails: ${description || ""}`;
       const text = await askInternal(display, model, { temperature: 0.2 });
       return parseSuggestedTasksFromText(text);
