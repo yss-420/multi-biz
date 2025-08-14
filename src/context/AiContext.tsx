@@ -32,7 +32,8 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   ), []);
 
-  const askInternal = async (displayText: string, modelText: string) => {
+  const askInternal = async (displayText: string, modelText: string, options?: { temperature?: number }) => {
+    if (isLoading) return; // prevent double-trigger
     const ctx = buildTaskContext({ businessName: currentBusiness?.name, tasks: tasksForSelected });
     const msgs: ChatMessage[] = [
       baseSystem,
@@ -41,7 +42,7 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     ];
     setIsLoading(true);
     try {
-      const data = await aiChat(msgs);
+      const data = await aiChat(msgs, { temperature: options?.temperature });
       const choice = data?.choices?.[0] || {};
       const text =
         choice?.message?.content ??
@@ -66,11 +67,11 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const summarizeTasks = async () => {
     const display = "Summarize my current tasks and suggest the top 3 next steps.";
     const model =
-      "Summarize the user's current tasks and propose the top 3 next steps. " +
-      "Respond as plain text with exact layout and new lines: \n" +
-      "Current tasks:\n1) item\n2) item\n\nNext steps:\n1) item\n2) item\n3) item\n" +
-      "Do not repeat these instructions.";
-    await askInternal(display, model);
+      "Summarize the user's current tasks (list up to 2) and propose the top 3 next steps. " +
+      "Output EXACTLY this structure with new lines and nothing else: \n" +
+      "Current tasks:\n1) <task one>\n2) <task two>\n\nNext steps:\n1) <step one>\n2) <step two>\n3) <step three>" +
+      "\nUse short phrases. Do not echo the prompt.";
+    await askInternal(display, model, { temperature: 0.1 });
     return display;
   };
 

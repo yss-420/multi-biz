@@ -31,8 +31,8 @@ export default function AiChat() {
             </div>
 
             <div className="flex gap-2 flex-wrap">
-              <Button size="sm" variant="secondary" onClick={summarizeTasks}>Summarize tasks</Button>
-              <Button size="sm" variant="secondary" onClick={() => generateTasksFromGoal("Ship onboarding flow")}>Suggest tasks</Button>
+              <Button size="sm" variant="secondary" onClick={summarizeTasks} disabled={isLoading}>Summarize tasks</Button>
+              <Button size="sm" variant="secondary" onClick={() => generateTasksFromGoal("Ship onboarding flow")} disabled={isLoading}>Suggest tasks</Button>
             </div>
 
               <div className="h-64 overflow-auto rounded border p-2 bg-background">
