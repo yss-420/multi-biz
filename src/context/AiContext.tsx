@@ -63,19 +63,9 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   const summarizeTasks = async () => {
     const prompt =
-      [
-        "Summarize my current tasks and suggest the top 3 next steps.",
-        "Respond as plain conversational text.",
-        "Use two short sections with new lines:",
-        "Current tasks:",
-        "1. ...",
-        "2. ...",
-        "Next steps:",
-        "1. ...",
-        "2. ...",
-        "3. ...",
-        "Do not echo this instruction.",
-      ].join(" ");
+      "Summarize my current tasks and suggest the top 3 next steps. " +
+      "Format exactly as:\n" +
+      "Current tasks:\n1) ...\n2) ...\n\nNext steps:\n1) ...\n2) ...\n3) ...";
     await ask(prompt);
     return prompt;
   };
