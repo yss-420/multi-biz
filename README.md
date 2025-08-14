@@ -71,7 +71,7 @@ Run both dev servers:
 npm run dev:full
 ```
 
-Set your key in an `.env` file at the project root:
+Set your key in an `.env` file at the project root (do not commit this file; it is ignored by git):
 
 ```
 OPENROUTER_API_KEY=sk-or-...
