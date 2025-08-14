@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
-import { aiChat, buildTaskContext, ChatMessage } from "@/lib/ai";
+import { aiChat, buildTaskContext, ChatMessage, parseSuggestedTasksFromText, SuggestedTask } from "@/lib/ai";
 import { useData } from "@/context/DataContext";
 
 type AiContextValue = {
@@ -8,6 +8,7 @@ type AiContextValue = {
   ask: (input: string) => Promise<void>;
   summarizeTasks: () => Promise<string>;
   generateTasksFromGoal: (goal: string) => Promise<unknown>;
+  analyzeSubscriptions: () => Promise<{ summary: string; suggestions: SuggestedTask[] }>;
   clear: () => void;
 };
 
@@ -36,7 +37,7 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     displayText: string,
     modelText: string,
     options?: { temperature?: number; retryModelText?: string }
-  ) => {
+  ): Promise<string> => {
     if (isLoading) return; // prevent double-trigger
     const ctx = buildTaskContext({ businessName: currentBusiness?.name, tasks: tasksForSelected });
     const msgs: ChatMessage[] = [
@@ -62,6 +63,7 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         text = c2?.message?.content ?? c2?.delta?.content ?? c2?.text ?? "";
       }
       setMessages((m) => [...m, { role: "user", content: displayText }, { role: "assistant", content: text }]);
+      return text;
     } catch (err: any) {
       const message = typeof err?.message === "string" ? err.message : "Unknown error";
       setMessages((m) => [
@@ -69,6 +71,7 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         { role: "user", content: displayText },
         { role: "assistant", content: `Sorry, I couldn't complete the request (${message}). Ensure the AI proxy is running and the API key is set.` },
       ]);
+      return "";
     } finally {
       setIsLoading(false);
     }
@@ -108,6 +111,26 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     ask,
     summarizeTasks,
     generateTasksFromGoal,
+    analyzeSubscriptions: async () => {
+      const { subsForSelected, currentBusiness } = useData();
+      const subs = subsForSelected;
+      const upcoming = subs
+        .filter((s) => {
+          const d = new Date(s.renewalDate).getTime();
+          const now = Date.now();
+          return d >= now && d <= now + 30 * 86400000;
+        })
+        .map((s) => `${s.serviceName} (${s.cycle}) – ${s.currency} ${s.cost} due ${new Date(s.renewalDate).toISOString().slice(0,10)}`)
+        .join("\n");
+      const display = "Analyze subscriptions and prepare tasks for upcoming renewals";
+      const model =
+        `You are helping plan renewals for ${currentBusiness?.name || "this business"}. ` +
+        `Upcoming renewals (30d):\n${upcoming || "(none)"}\n` +
+        `Provide a brief plain-text summary and then propose up to 5 actionable tasks in this JSON shape only: {"tasks":[{"title":"...","description":"...","priority":"low|medium|high","dueDate":"YYYY-MM-DD"}]}.`;
+      const reply = await askInternal(display, model, { temperature: 0.2 });
+      const suggestions = parseSuggestedTasksFromText(reply);
+      return { summary: reply, suggestions };
+    },
     clear,
   };
 

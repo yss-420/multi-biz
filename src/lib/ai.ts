@@ -31,4 +31,43 @@ export function buildTaskContext(params: {
   return `You are MultiBiz AI, an operations copilot. Business: ${businessName || "Current"}.\nHere are current tasks:\n${summary}`;
 }
 
+// Suggested task shape from AI (draft)
+export type SuggestedTask = {
+  title: string;
+  description?: string;
+  priority?: "low" | "medium" | "high";
+  dueDate?: string; // YYYY-MM-DD
+};
+
+// Try to extract a tasks array from an AI response. Accepts JSON or numbered lines.
+export function parseSuggestedTasksFromText(text: string): SuggestedTask[] {
+  const out: SuggestedTask[] = [];
+  // JSON first
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    try {
+      const obj = JSON.parse(jsonMatch[0]);
+      const tasks = Array.isArray(obj?.tasks) ? obj.tasks : [];
+      for (const t of tasks) {
+        if (t?.title && typeof t.title === "string") {
+          out.push({
+            title: t.title,
+            description: typeof t.description === "string" ? t.description : undefined,
+            priority: ["low", "medium", "high"].includes(t.priority) ? t.priority : undefined,
+            dueDate: typeof t.dueDate === "string" ? t.dueDate : undefined,
+          });
+        }
+      }
+      if (out.length) return out;
+    } catch {}
+  }
+  // Numbered lines fallback: 1. Title ...
+  const lines = text.split(/\n|\r/).map((l) => l.trim());
+  for (const l of lines) {
+    const m = l.match(/^\d+[\).]\s*(.+)$/);
+    if (m && m[1]) out.push({ title: m[1] });
+  }
+  return out;
+}
+
 

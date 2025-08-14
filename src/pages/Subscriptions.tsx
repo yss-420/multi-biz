@@ -12,9 +12,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { useAi } from "@/context/AiContext";
+import { Dialog as UIDialog, DialogContent as UIDialogContent, DialogHeader as UIDialogHeader, DialogTitle as UIDialogTitle } from "@/components/ui/dialog";
 
 export default function SubscriptionsPage() {
   const { subsForSelected, addSubscription, updateSubscription, removeSubscription, currentBusiness } = useData();
+  const { analyzeSubscriptions } = useAi();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<Omit<Subscription, "id">>({
     businessId: "",
@@ -31,6 +34,9 @@ export default function SubscriptionsPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [edit, setEdit] = useState<Subscription | null>(null);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [aiOpen, setAiOpen] = useState(false);
+  const [aiSummary, setAiSummary] = useState("");
+  const [aiTasks, setAiTasks] = useState<any[]>([]);
 
   const startEdit = (s: Subscription) => {
     setEdit({ ...s });
@@ -57,6 +63,18 @@ export default function SubscriptionsPage() {
           Subscriptions
           <Badge variant="secondary" className="text-xs">Total {subsForSelected.length}</Badge>
         </h1>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="secondary"
+            onClick={async () => {
+              const res = await analyzeSubscriptions();
+              setAiSummary(res.summary);
+              setAiTasks(res.suggestions);
+              setAiOpen(true);
+            }}
+          >
+            Analyze subscriptions
+          </Button>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button>Add Subscription</Button>
@@ -91,7 +109,7 @@ export default function SubscriptionsPage() {
                        <SelectItem value="yearly">Yearly</SelectItem>
                      </SelectContent>
                   </Select>
-                </div>
+        </div>
               </div>
               <div className="grid gap-1">
                 <Label>Renewal Date</Label>
@@ -242,6 +260,38 @@ export default function SubscriptionsPage() {
           </TableBody>
         </Table>
       </Card>
+      <UIDialog open={aiOpen} onOpenChange={setAiOpen}>
+        <UIDialogContent>
+          <UIDialogHeader>
+            <UIDialogTitle>AI suggestions for renewals</UIDialogTitle>
+          </UIDialogHeader>
+          <div className="space-y-3">
+            <div className="text-sm whitespace-pre-wrap bg-muted/40 p-2 rounded">{aiSummary}</div>
+            {aiTasks.length > 0 && (
+              <div>
+                <div className="font-semibold mb-2">Draft tasks</div>
+                <ul className="list-disc pl-5 space-y-1 text-sm">
+                  {aiTasks.map((t, i) => (
+                    <li key={i}>{t.title}</li>
+                  ))}
+                </ul>
+                <div className="flex justify-end mt-3">
+                  <Button
+                    onClick={() => {
+                      if (!currentBusiness) return;
+                      // Minimal apply: add each suggested task for the current business
+                      const { addTask } = require("@/context/DataContext");
+                    }}
+                    disabled
+                  >
+                    Apply tasks (coming soon)
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </UIDialogContent>
+      </UIDialog>
     </div>
   );
 }
