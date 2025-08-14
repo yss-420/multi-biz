@@ -32,12 +32,12 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   ), []);
 
-  const ask = async (input: string) => {
+  const askInternal = async (displayText: string, modelText: string) => {
     const ctx = buildTaskContext({ businessName: currentBusiness?.name, tasks: tasksForSelected });
     const msgs: ChatMessage[] = [
       baseSystem,
       { role: "system", content: ctx },
-      { role: "user", content: input },
+      { role: "user", content: modelText },
     ];
     setIsLoading(true);
     try {
@@ -48,12 +48,12 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         choice?.delta?.content ??
         choice?.text ??
         "";
-      setMessages((m) => [...m, { role: "user", content: input }, { role: "assistant", content: text }]);
+      setMessages((m) => [...m, { role: "user", content: displayText }, { role: "assistant", content: text }]);
     } catch (err: any) {
       const message = typeof err?.message === "string" ? err.message : "Unknown error";
       setMessages((m) => [
         ...m,
-        { role: "user", content: input },
+        { role: "user", content: displayText },
         { role: "assistant", content: `Sorry, I couldn't complete the request (${message}). Ensure the AI proxy is running and the API key is set.` },
       ]);
     } finally {
@@ -61,22 +61,27 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
+  const ask = async (input: string) => askInternal(input, input);
+
   const summarizeTasks = async () => {
-    const prompt =
-      "Summarize my current tasks and suggest the top 3 next steps. " +
-      "Format exactly as:\n" +
-      "Current tasks:\n1) ...\n2) ...\n\nNext steps:\n1) ...\n2) ...\n3) ...";
-    await ask(prompt);
-    return prompt;
+    const display = "Summarize my current tasks and suggest the top 3 next steps.";
+    const model =
+      "Summarize the user's current tasks and propose the top 3 next steps. " +
+      "Respond as plain text with exact layout and new lines: \n" +
+      "Current tasks:\n1) item\n2) item\n\nNext steps:\n1) item\n2) item\n3) item\n" +
+      "Do not repeat these instructions.";
+    await askInternal(display, model);
+    return display;
   };
 
   const generateTasksFromGoal = async (goal: string) => {
-    const prompt =
+    const display = `Suggest tasks to achieve: ${goal}`;
+    const model =
       `Propose 3-7 concrete tasks to achieve this goal: "${goal}". ` +
       `Respond as a concise numbered list, one task per line. ` +
       `Do not include code, JSON, or repeat the goal.`;
-    await ask(prompt);
-    return prompt;
+    await askInternal(display, model);
+    return display;
   };
 
   const clear = () => setMessages([]);
