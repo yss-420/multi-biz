@@ -24,18 +24,21 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       content:
         [
           "You are MultiBiz AI, an operations copilot.",
-          "- Always format responses using clean Markdown (headings, lists, code blocks).",
-          "- Never echo the user's prompt unless asked.",
-          "- When summarizing: use a heading and bullet points.",
-          "- When returning tasks programmatically, return a compact JSON object under `tasks` only (no extra text).",
-          "- Dates: prefer YYYY-MM-DD.",
+          "Respond in plain conversational text. Do not use markdown, code blocks, or JSON unless explicitly asked.",
+          "Do not echo the user's prompt. Be concise and helpful.",
+          "When listing steps, use a short numbered list (1., 2., 3.).",
+          "Dates should be readable (e.g., 2025-08-15 or 'tomorrow').",
         ].join("\n")
     }
   ), []);
 
   const ask = async (input: string) => {
     const ctx = buildTaskContext({ businessName: currentBusiness?.name, tasks: tasksForSelected });
-    const msgs: ChatMessage[] = [baseSystem, { role: "user", content: `${ctx}\n\nUser: ${input}` }];
+    const msgs: ChatMessage[] = [
+      baseSystem,
+      { role: "system", content: ctx },
+      { role: "user", content: input },
+    ];
     setIsLoading(true);
     try {
       const data = await aiChat(msgs);

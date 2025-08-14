@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { MessageSquare, X } from "lucide-react";
-import ReactMarkdown from "react-markdown";
 
 export default function AiChat() {
   const { messages, isLoading, ask, summarizeTasks, generateTasksFromGoal } = useAi();
@@ -26,7 +25,9 @@ export default function AiChat() {
           <Card className="p-3 space-y-3 shadow-xl animate-enter">
             <div className="flex items-center justify-between">
               <div className="font-semibold">MultiBiz AI</div>
-              <div className="text-xs text-muted-foreground">Qwen3 4B via OpenRouter</div>
+              <div className="text-xs text-muted-foreground" aria-hidden>
+                {/* intentionally empty to remove model label */}
+              </div>
             </div>
 
             <div className="flex gap-2 flex-wrap">
@@ -41,15 +42,9 @@ export default function AiChat() {
               <div className="space-y-2">
                 {messages.map((m, i) => (
                   <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
-                      {m.role === "user" ? (
-                        <div className="inline-block rounded px-2 py-1 text-sm bg-primary/20">
-                          {m.content}
-                        </div>
-                      ) : (
-                        <div className="inline-block rounded px-2 py-1 text-sm bg-muted/60 prose prose-sm dark:prose-invert max-w-[36rem] text-left">
-                          <ReactMarkdown>{m.content}</ReactMarkdown>
-                        </div>
-                      )}
+                      <div className={`inline-block rounded px-2 py-1 text-sm ${m.role === "user" ? "bg-primary/20" : "bg-muted/60"}`}>
+                        {m.content}
+                      </div>
                   </div>
                 ))}
                 {isLoading && <div className="text-xs text-muted-foreground">Thinking…</div>}
