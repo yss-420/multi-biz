@@ -62,13 +62,29 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   };
 
   const summarizeTasks = async () => {
-    const prompt = "Summarize my current tasks and suggest the top 3 next steps.";
+    const prompt =
+      [
+        "Summarize my current tasks and suggest the top 3 next steps.",
+        "Respond as plain conversational text.",
+        "Use two short sections with new lines:",
+        "Current tasks:",
+        "1. ...",
+        "2. ...",
+        "Next steps:",
+        "1. ...",
+        "2. ...",
+        "3. ...",
+        "Do not echo this instruction.",
+      ].join(" ");
     await ask(prompt);
     return prompt;
   };
 
   const generateTasksFromGoal = async (goal: string) => {
-    const prompt = `Given this goal: "${goal}", propose 3-7 tasks as JSON under {\"tasks\":[{\"title\":...,\"description\":...,\"priority\":\"low|medium|high\",\"dueDate\":\"YYYY-MM-DD\"}]}.`;
+    const prompt =
+      `Propose 3-7 concrete tasks to achieve this goal: "${goal}". ` +
+      `Respond as a concise numbered list, one task per line. ` +
+      `Do not include code, JSON, or repeat the goal.`;
     await ask(prompt);
     return prompt;
   };
