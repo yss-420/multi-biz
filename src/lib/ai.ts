@@ -1,17 +1,22 @@
 export type ChatMessage = { role: "system" | "user" | "assistant"; content: string };
 
 export async function aiChat(messages: ChatMessage[], options?: { model?: string; temperature?: number }) {
-  const res = await fetch("/api/ai/chat/completions", {
+  const res = await fetch("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: options?.model || "qwen/qwen3-4b:free",
       messages,
-      temperature: options?.temperature ?? 0.7,
+      temperature: options?.temperature ?? 0.2,
+      max_tokens: 384,
     }),
   });
-  if (!res.ok) throw new Error(`AI error: ${res.status}`);
-  return res.json();
+  const text = await res.text();
+  if (!res.ok) {
+    let message = `AI error: ${res.status}`;
+    try { const j = JSON.parse(text); message = j?.error || message; } catch {}
+    throw new Error(message);
+  }
+  try { return JSON.parse(text); } catch { return { error: "Invalid JSON", raw: text }; }
 }
 
 export function buildTaskContext(params: {
