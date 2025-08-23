@@ -110,7 +110,14 @@ const uid = () => Math.random().toString(36).slice(2, 10);
 
 const initialState = (): DataState => {
   const stored = localStorage.getItem(LS_KEY);
-  if (stored) return JSON.parse(stored);
+  if (stored) {
+    const parsedData = JSON.parse(stored);
+    // Ensure notes array exists for backward compatibility
+    return {
+      ...parsedData,
+      notes: parsedData.notes || []
+    };
+  }
   const biz1: Business = { id: uid(), name: "Secret Share", color: "biz-blue" };
   const today = new Date();
   const inDays = (d: number) => new Date(today.getTime() + d * 86400000).toISOString();
