@@ -11,6 +11,7 @@ import AiChat from "./components/AiChat";
 import Dashboard from "./pages/Dashboard";
 import SubscriptionsPage from "./pages/Subscriptions";
 import TasksPage from "./pages/Tasks";
+import NotesPage from "./pages/Notes";
 import VaultPage from "./pages/Vault";
 import TeamPage from "./pages/Team";
 import SettingsPage from "./pages/Settings";
@@ -49,6 +50,7 @@ const App = () => (
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="subscriptions" element={<SubscriptionsPage />} />
                 <Route path="tasks" element={<TasksPage />} />
+                <Route path="notes" element={<NotesPage />} />
                 <Route path="vault" element={<VaultPage />} />
                 <Route path="team" element={<TeamPage />} />
                 <Route path="settings" element={<SettingsPage />} />

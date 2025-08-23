@@ -5,6 +5,7 @@ import {
   Key,
   Users,
   CheckSquare,
+  FileText,
   Settings,
 } from "lucide-react";
 import {
@@ -23,6 +24,7 @@ const items = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Subscriptions", url: "/subscriptions", icon: CreditCard },
   { title: "Tasks", url: "/tasks", icon: CheckSquare },
+  { title: "Notes", url: "/notes", icon: FileText },
   { title: "API Vault", url: "/vault", icon: Key },
   { title: "Team", url: "/team", icon: Users },
   { title: "Settings", url: "/settings", icon: Settings },

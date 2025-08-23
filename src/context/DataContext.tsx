@@ -53,6 +53,17 @@ export type Settings = {
   aiMaxTokens?: number;
 };
 
+export type Note = {
+  id: ID;
+  businessId: ID;
+  title: string;
+  content: string;
+  label?: string;
+  color: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type DataState = {
   businesses: Business[];
   selectedBusinessId: ID;
@@ -61,6 +72,7 @@ export type DataState = {
   apiKeys: ApiKey[];
   team: TeamMember[];
   settings: Settings;
+  notes: Note[];
 };
 
 type DataContextValue = DataState & {
@@ -81,6 +93,9 @@ type DataContextValue = DataState & {
   assignMemberToBusinesses: (memberId: ID, businessIds: ID[]) => void;
   updateTeamMember: (memberId: ID, patch: Partial<TeamMember>) => void;
   removeTeamMember: (memberId: ID) => void;
+  addNote: (note: Omit<Note, "id" | "createdAt" | "updatedAt">) => void;
+  updateNote: (id: ID, updates: Partial<Note>) => void;
+  deleteNote: (id: ID) => void;
   currentBusiness: Business | undefined;
   subsForSelected: Subscription[];
   tasksForSelected: Task[];
@@ -152,6 +167,7 @@ const initialState = (): DataState => {
       { id: uid(), name: "Manav", email: "you@example.com", assignedBusinessIds: [biz1.id], status: "active" },
     ],
     settings: { reminderDays: [3, 1], aiTemperature: 0.2, aiMaxTokens: 384 },
+    notes: [],
   };
 };
 
@@ -258,6 +274,34 @@ const removeTeamMember = (memberId: ID) =>
     const updateSettings = (patch: Partial<Settings>) =>
       setState((st) => ({ ...st, settings: { ...st.settings, ...patch } }));
 
+    const addNote = (note: Omit<Note, "id" | "createdAt" | "updatedAt">) => {
+      const newNote: Note = {
+        ...note,
+        id: uid(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      setState((st) => ({ ...st, notes: [...st.notes, newNote] }));
+    };
+
+    const updateNote = (id: ID, updates: Partial<Note>) => {
+      setState((st) => ({
+        ...st,
+        notes: st.notes.map((note) =>
+          note.id === id
+            ? { ...note, ...updates, updatedAt: new Date().toISOString() }
+            : note
+        ),
+      }));
+    };
+
+    const deleteNote = (id: ID) => {
+      setState((st) => ({
+        ...st,
+        notes: st.notes.filter((note) => note.id !== id),
+      }));
+    };
+
 return {
   ...state,
   selectBusiness,
@@ -277,6 +321,9 @@ return {
   assignMemberToBusinesses,
   updateTeamMember,
   removeTeamMember,
+  addNote,
+  updateNote,
+  deleteNote,
   currentBusiness,
   subsForSelected,
   tasksForSelected,

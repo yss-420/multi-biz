@@ -60,10 +60,10 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## AI (OpenRouter) – Development setup
+## AI (Gemini API) – Development setup
 
-- A lightweight proxy server will run at http://localhost:8787 to protect your OpenRouter API key.
-- Frontend calls `/api/ai/...`, which is proxied to the local server during development.
+- A lightweight proxy server will run at http://localhost:8787 to provide AI functionality using Google's Gemini API.
+- Frontend calls `/api/chat`, which is proxied to the local server during development.
 
 Run both dev servers:
 
@@ -71,13 +71,7 @@ Run both dev servers:
 npm run dev:full
 ```
 
-Set your key in an `.env` file at the project root (do not commit this file; it is ignored by git):
-
-```
-OPENROUTER_API_KEY=sk-or-...
-OPENROUTER_SITE_URL=http://localhost:8080
-OPENROUTER_SITE_TITLE=MultiBiz
-```
+The Gemini API key is embedded in the server for development purposes.
 
 ## How can I deploy this project?
 
