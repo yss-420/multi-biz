@@ -4,6 +4,7 @@ export async function aiChat(
   messages: ChatMessage[],
   options?: { model?: string; temperature?: number; max_tokens?: number }
 ) {
+  console.log("Making AI request to /chat with:", { messages, options });
   const res = await fetch("/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -14,12 +15,21 @@ export async function aiChat(
     }),
   });
   const text = await res.text();
+  console.log("AI response:", { status: res.status, text });
   if (!res.ok) {
     let message = `AI error: ${res.status}`;
     try { const j = JSON.parse(text); message = j?.error || message; } catch {}
+    console.error("AI error:", message);
     throw new Error(message);
   }
-  try { return JSON.parse(text); } catch { return { error: "Invalid JSON", raw: text }; }
+  try { 
+    const result = JSON.parse(text);
+    console.log("Parsed AI result:", result);
+    return result;
+  } catch { 
+    console.error("Failed to parse AI response:", text);
+    return { error: "Invalid JSON", raw: text }; 
+  }
 }
 
 export function buildTaskContext(params: {

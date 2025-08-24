@@ -39,15 +39,32 @@ export default function AiChat() {
               {messages.length === 0 && (
                 <div className="text-sm text-muted-foreground">Ask me to summarize tasks or propose next steps.</div>
               )}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {messages.map((m, i) => (
-                  <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
-                      <div className={`inline-block rounded px-2 py-1 text-sm whitespace-pre-wrap ${m.role === "user" ? "bg-primary/20" : "bg-muted/60"}`}>
+                  <div key={i} className={m.role === "user" ? "flex justify-end" : "flex justify-start"}>
+                    <div className={`max-w-[85%] rounded-lg px-3 py-2 shadow-sm ${
+                      m.role === "user" 
+                        ? "bg-primary text-primary-foreground" 
+                        : "bg-card border text-card-foreground"
+                    }`}>
+                      <div className="text-sm whitespace-pre-wrap">
                         {m.content}
                       </div>
+                      <div className={`text-xs mt-1 opacity-70 ${
+                        m.role === "user" ? "text-primary-foreground/70" : "text-muted-foreground"
+                      }`}>
+                        {m.role === "user" ? "You" : "MultiBiz AI"}
+                      </div>
+                    </div>
                   </div>
                 ))}
-                {isLoading && <div className="text-xs text-muted-foreground">Thinking…</div>}
+                {isLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-card border rounded-lg px-3 py-2 shadow-sm">
+                      <div className="text-sm text-muted-foreground">Thinking…</div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
