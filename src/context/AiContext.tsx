@@ -51,19 +51,15 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     try {
       const temp = options?.temperature ?? 0.2;
       const data = await aiChat(msgs, { temperature: temp });
-      const choice = data?.choices?.[0] || {};
-      let text =
-        choice?.message?.content ??
-        choice?.delta?.content ??
-        choice?.text ??
-        "";
+      const choice = data?.choices?.[0];
+      let text = choice?.message?.content || "";
       if (!text || text.trim().length < 3) {
         // One automatic retry with a simplified prompt
         const retry = options?.retryModelText || modelText;
         const retryMsgs: ChatMessage[] = [baseSystem, { role: "system", content: ctx }, { role: "user", content: retry }];
         const data2 = await aiChat(retryMsgs, { temperature: options?.temperature ?? 0.2 });
-        const c2 = data2?.choices?.[0] || {};
-        text = c2?.message?.content ?? c2?.delta?.content ?? c2?.text ?? "";
+        const c2 = data2?.choices?.[0];
+        text = c2?.message?.content || "";
       }
       setMessages((m) => [...m, { role: "user", content: displayText }, { role: "assistant", content: text }]);
       return text;

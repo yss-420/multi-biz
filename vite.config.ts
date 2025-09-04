@@ -8,18 +8,6 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
-    proxy: {
-      "/chat": {
-        target: "http://localhost:8787",
-        changeOrigin: true,
-        rewrite: (path) => path,
-      },
-      "/chat/completions": {
-        target: "http://localhost:8787",
-        changeOrigin: true,
-        rewrite: (path) => path,
-      },
-    },
   },
   plugins: [
     react(),
