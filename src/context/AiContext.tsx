@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo, useState } from "react";
+import React, { createContext, useContext, useMemo, useState, useEffect } from "react";
 import { aiChat, buildTaskContext, ChatMessage, parseSuggestedTasksFromText, SuggestedTask } from "@/lib/ai";
 import { useData } from "@/context/DataContext";
 
@@ -19,8 +19,19 @@ const AiContext = createContext<AiContextValue | undefined>(undefined);
 
 export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { currentBusiness, tasksForSelected, subsForSelected } = useData();
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messagesByBusiness, setMessagesByBusiness] = useState<Record<string, ChatMessage[]>>({});
+  const [currentBusinessId, setCurrentBusinessId] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Switch chat context when business changes
+  useEffect(() => {
+    if (currentBusiness?.id && currentBusiness.id !== currentBusinessId) {
+      setCurrentBusinessId(currentBusiness.id);
+    }
+  }, [currentBusiness?.id, currentBusinessId]);
+
+  // Get messages for current business
+  const messages = currentBusinessId ? (messagesByBusiness[currentBusinessId] || []) : [];
 
   const baseSystem: ChatMessage = useMemo(() => (
     {
@@ -41,7 +52,7 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     modelText: string,
     options?: { temperature?: number; retryModelText?: string }
   ): Promise<string> => {
-    if (isLoading) return ""; // prevent double-trigger
+    if (isLoading || !currentBusinessId) return ""; // prevent double-trigger
     const ctx = buildTaskContext({ businessName: currentBusiness?.name, tasks: tasksForSelected });
     const msgs: ChatMessage[] = [
       baseSystem,
@@ -62,15 +73,23 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         const c2 = data2?.choices?.[0];
         text = c2?.message?.content || "";
       }
-      setMessages((m) => [...m, { role: "user", content: displayText }, { role: "assistant", content: text }]);
+      
+      const userMsg = { role: "user" as const, content: displayText };
+      const assistantMsg = { role: "assistant" as const, content: text };
+      setMessagesByBusiness(prev => ({ 
+        ...prev, 
+        [currentBusinessId]: [...(prev[currentBusinessId] || []), userMsg, assistantMsg] 
+      }));
+      
       return text;
     } catch (err: any) {
       const message = typeof err?.message === "string" ? err.message : "Unknown error";
-      setMessages((m) => [
-        ...m,
-        { role: "user", content: displayText },
-        { role: "assistant", content: `Sorry, I couldn't complete the request (${message}). Ensure the AI proxy is running and the API key is set.` },
-      ]);
+      const userMsg = { role: "user" as const, content: displayText };
+      const errorMsg = { role: "assistant" as const, content: `Sorry, I couldn't complete the request (${message}). Ensure the AI proxy is running and the API key is set.` };
+      setMessagesByBusiness(prev => ({ 
+        ...prev, 
+        [currentBusinessId]: [...(prev[currentBusinessId] || []), userMsg, errorMsg] 
+      }));
       return "";
     } finally {
       setIsLoading(false);
@@ -105,7 +124,11 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     return { text, suggestions };
   };
 
-  const clear = () => setMessages([]);
+  const clear = () => {
+    if (currentBusinessId) {
+      setMessagesByBusiness(prev => ({ ...prev, [currentBusinessId]: [] }));
+    }
+  };
 
   const value: AiContextValue = {
     messages,
@@ -202,5 +225,3 @@ export const useAi = () => {
   if (!ctx) throw new Error("useAi must be used within AiProvider");
   return ctx;
 };
-
-

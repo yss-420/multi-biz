@@ -7,13 +7,15 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { Pencil, Trash2, Calendar as CalendarIcon } from "lucide-react";
+import { Pencil, Trash2, Calendar as CalendarIcon, Info } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { useAi } from "@/context/AiContext";
 import { Dialog as UIDialog, DialogContent as UIDialogContent, DialogHeader as UIDialogHeader, DialogTitle as UIDialogTitle } from "@/components/ui/dialog";
+import { previewRenewalDates, type SubscriptionCycle } from "@/lib/dateUtils";
+import { cn } from "@/lib/utils";
 
 export default function SubscriptionsPage() {
   const { subsForSelected, addSubscription, updateSubscription, removeSubscription, currentBusiness, addTask } = useData();
@@ -29,6 +31,9 @@ export default function SubscriptionsPage() {
     autoRenew: true,
     notes: "",
     status: "active",
+    subscriptionType: "ongoing",
+    startDate: new Date().toISOString(),
+    endDate: undefined,
   });
 
   const [editOpen, setEditOpen] = useState(false);
@@ -138,6 +143,112 @@ export default function SubscriptionsPage() {
                   </PopoverContent>
                 </Popover>
               </div>
+              
+              <div className="grid gap-1">
+                <Label>Subscription Type</Label>
+                <Select value={form.subscriptionType} onValueChange={(v) => setForm({ ...form, subscriptionType: v as any })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ongoing">Ongoing (Recurring)</SelectItem>
+                    <SelectItem value="fixed">Fixed Term</SelectItem>
+                    <SelectItem value="indefinite">Indefinite (No End Date)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {form.subscriptionType === "fixed" && (
+                <>
+                  <div className="grid gap-1">
+                    <Label>Start Date</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={cn("w-[240px] justify-start text-left font-normal", !form.startDate && "text-muted-foreground")}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {form.startDate ? format(new Date(form.startDate), "PPP") : <span>Pick a date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={form.startDate ? new Date(form.startDate) : undefined}
+                          onSelect={(d) => setForm({ ...form, startDate: d ? d.toISOString() : form.startDate })}
+                          initialFocus
+                          className="p-3 pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <div className="grid gap-1">
+                    <Label>End Date</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={cn("w-[240px] justify-start text-left font-normal", !form.endDate && "text-muted-foreground")}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {form.endDate ? format(new Date(form.endDate), "PPP") : <span>Pick a date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={form.endDate ? new Date(form.endDate) : undefined}
+                          onSelect={(d) => setForm({ ...form, endDate: d ? d.toISOString() : undefined })}
+                          initialFocus
+                          className="p-3 pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </>
+              )}
+
+              {(form.subscriptionType === "ongoing" || form.subscriptionType === "indefinite") && (
+                <div className="grid gap-1">
+                  <Label>Next Renewal Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn("w-[240px] justify-start text-left font-normal", !form.renewalDate && "text-muted-foreground")}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {form.renewalDate ? format(new Date(form.renewalDate), "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={form.renewalDate ? new Date(form.renewalDate) : undefined}
+                        onSelect={(d) => setForm({ ...form, renewalDate: d ? d.toISOString() : form.renewalDate })}
+                        initialFocus
+                        className="p-3 pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  
+                  {form.renewalDate && form.cycle && (
+                    <div className="mt-2 p-2 bg-muted/40 rounded text-sm">
+                      <div className="flex items-center gap-1 mb-1">
+                        <Info className="h-3 w-3" />
+                        <span className="font-medium">Upcoming renewals:</span>
+                      </div>
+                      <ul className="text-xs space-y-0.5 text-muted-foreground">
+                        {previewRenewalDates(new Date(form.renewalDate), form.cycle as SubscriptionCycle, 3).map((date, i) => (
+                          <li key={i}>• {date}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="grid gap-1">
                 <Label>Notes</Label>
                 <Input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
@@ -186,13 +297,79 @@ export default function SubscriptionsPage() {
                     </Select>
                   </div>
                 </div>
+              <div className="grid gap-1">
+                <Label>Subscription Type</Label>
+                <Select value={edit?.subscriptionType || "ongoing"} onValueChange={(v) => setEdit({ ...edit!, subscriptionType: v as any })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ongoing">Ongoing (Recurring)</SelectItem>
+                    <SelectItem value="fixed">Fixed Term</SelectItem>
+                    <SelectItem value="indefinite">Indefinite (No End Date)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {edit?.subscriptionType === "fixed" && (
+                <>
+                  <div className="grid gap-1">
+                    <Label>Start Date</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={cn("w-[240px] justify-start text-left font-normal", !edit?.startDate && "text-muted-foreground")}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {edit?.startDate ? format(new Date(edit.startDate), "PPP") : <span>Pick a date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={edit?.startDate ? new Date(edit.startDate) : undefined}
+                          onSelect={(d) => setEdit({ ...edit!, startDate: d ? d.toISOString() : edit!.startDate })}
+                          initialFocus
+                          className="p-3 pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <div className="grid gap-1">
+                    <Label>End Date</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={cn("w-[240px] justify-start text-left font-normal", !edit?.endDate && "text-muted-foreground")}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {edit?.endDate ? format(new Date(edit.endDate), "PPP") : <span>Pick a date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={edit?.endDate ? new Date(edit.endDate) : undefined}
+                          onSelect={(d) => setEdit({ ...edit!, endDate: d ? d.toISOString() : undefined })}
+                          initialFocus
+                          className="p-3 pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </>
+              )}
+
+              {(edit?.subscriptionType === "ongoing" || edit?.subscriptionType === "indefinite" || !edit?.subscriptionType) && (
                 <div className="grid gap-1">
-                  <Label>Renewal Date</Label>
+                  <Label>Next Renewal Date</Label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
                         variant={"outline"}
-                        className={`w-[240px] justify-start text-left font-normal ${!edit?.renewalDate ? "text-muted-foreground" : ""}`}
+                        className={cn("w-[240px] justify-start text-left font-normal", !edit?.renewalDate && "text-muted-foreground")}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {edit?.renewalDate ? format(new Date(edit.renewalDate), "PPP") : <span>Pick a date</span>}
@@ -208,11 +385,27 @@ export default function SubscriptionsPage() {
                       />
                     </PopoverContent>
                   </Popover>
+                  
+                  {edit?.renewalDate && edit?.cycle && (
+                    <div className="mt-2 p-2 bg-muted/40 rounded text-sm">
+                      <div className="flex items-center gap-1 mb-1">
+                        <Info className="h-3 w-3" />
+                        <span className="font-medium">Upcoming renewals:</span>
+                      </div>
+                      <ul className="text-xs space-y-0.5 text-muted-foreground">
+                        {previewRenewalDates(new Date(edit.renewalDate), edit.cycle as SubscriptionCycle, 3).map((date, i) => (
+                          <li key={i}>• {date}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
-                <div className="grid gap-1">
-                  <Label>Notes</Label>
-                  <Input value={edit.notes || ""} onChange={(e) => setEdit({ ...edit!, notes: e.target.value })} />
-                </div>
+              )}
+
+              <div className="grid gap-1">
+                <Label>Notes</Label>
+                <Input value={edit?.notes || ""} onChange={(e) => setEdit({ ...edit!, notes: e.target.value })} />
+              </div>
               </div>
               <DialogFooter>
                 <Button onClick={() => { if (edit) updateSubscription(edit); setEditOpen(false); }}>Save</Button>

@@ -14,6 +14,9 @@ export type Subscription = {
   autoRenew: boolean;
   notes?: string;
   status: "active" | "cancelled";
+  subscriptionType: "ongoing" | "fixed" | "indefinite";
+  startDate?: string;
+  endDate?: string;
 };
 export type Priority = "low" | "medium" | "high";
 export type TaskStatus = "todo" | "in-progress" | "completed";
@@ -136,6 +139,7 @@ const initialState = (): DataState => {
         autoRenew: true,
         notes: "Not on auto-renew (demo)",
         status: "active",
+        subscriptionType: "ongoing",
       },
       {
         id: uid(),
@@ -147,6 +151,7 @@ const initialState = (): DataState => {
         renewalDate: inDays(5),
         autoRenew: true,
         status: "active",
+        subscriptionType: "ongoing",
       },
     ],
     tasks: [
