@@ -39,11 +39,12 @@ async function callGemini(messages, temperature = 0.2, max_tokens = 384) {
     throw new Error(data.error?.message || "Gemini API error");
   }
 
+  const content = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response";
   return {
     choices: [{
       message: {
         role: "assistant",
-        content: data.candidates?.[0]?.content?.parts?.[0]?.text || "No response"
+        content: content
       }
     }]
   };

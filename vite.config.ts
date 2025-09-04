@@ -9,15 +9,15 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
     proxy: {
-      "/api": {
+      "/chat": {
         target: "http://localhost:8787",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ""),
+        rewrite: (path) => path,
       },
-      "/api/ai": {
+      "/chat/completions": {
         target: "http://localhost:8787",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/ai/, ""),
+        rewrite: (path) => path,
       },
     },
   },
