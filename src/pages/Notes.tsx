@@ -33,12 +33,13 @@ const noteColors = [
 
 export default function NotesPage() {
   const { businesses, selectedBusinessId, notes, addNote, updateNote, deleteNote } = useData();
-  const { ask, isLoading } = useAi();
+  const { ask, askAndReturn, isLoading } = useAi();
   const [showDialog, setShowDialog] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [showRefineDialog, setShowRefineDialog] = useState(false);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [refinedContent, setRefinedContent] = useState("");
+  const [isRefiningInDialog, setIsRefiningInDialog] = useState(false);
   
   const [form, setForm] = useState({
     title: "",
@@ -112,6 +113,28 @@ Please provide only the improved content without any additional explanation.`;
       // The refined content will be available in the AI context messages
     } catch (error) {
       console.error("Failed to refine note:", error);
+    }
+  };
+
+  const handleRefineInDialog = async () => {
+    if (!form.content.trim()) return;
+    
+    setIsRefiningInDialog(true);
+    try {
+      const prompt = `Please refine and improve the following note content while keeping its core meaning. Make it clearer, better structured, and more professional:
+
+${form.content}
+
+Please provide only the improved content without any additional explanation.`;
+      
+      const refinedText = await askAndReturn(prompt);
+      if (refinedText && refinedText.trim()) {
+        setForm({ ...form, content: refinedText.trim() });
+      }
+    } catch (error) {
+      console.error("Failed to refine note:", error);
+    } finally {
+      setIsRefiningInDialog(false);
     }
   };
 
@@ -214,13 +237,25 @@ Please provide only the improved content without any additional explanation.`;
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setShowDialog(false)}>
-                  Cancel
+              <div className="flex justify-between">
+                <Button 
+                  variant="secondary" 
+                  onClick={handleRefineInDialog}
+                  disabled={isRefiningInDialog || !form.content.trim()}
+                  className="flex items-center gap-2"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  {isRefiningInDialog ? "Refining..." : "AI Refine"}
                 </Button>
-                <Button onClick={onSubmit} disabled={!form.title.trim() || !form.content.trim()}>
-                  {editingNote ? "Update Note" : "Add Note"}
-                </Button>
+                
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => setShowDialog(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={onSubmit} disabled={!form.title.trim() || !form.content.trim()}>
+                    {editingNote ? "Update Note" : "Add Note"}
+                  </Button>
+                </div>
               </div>
             </div>
           </DialogContent>

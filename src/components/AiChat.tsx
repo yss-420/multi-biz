@@ -42,14 +42,14 @@ export default function AiChat() {
               <div className="space-y-3">
                 {messages.map((m, i) => (
                   <div key={i} className={m.role === "user" ? "flex justify-end" : "flex justify-start"}>
-                    <div className={`max-w-[85%] rounded-lg px-3 py-2 shadow-sm ${
-                      m.role === "user" 
-                        ? "bg-primary text-primary-foreground" 
-                        : "bg-card border text-card-foreground"
-                    }`}>
-                      <div className="text-sm whitespace-pre-wrap">
-                        {m.content}
-                      </div>
+                     <div className={`max-w-[85%] rounded-lg px-3 py-2 shadow-sm ${
+                       m.role === "user" 
+                         ? "bg-primary text-primary-foreground" 
+                         : "bg-card border text-card-foreground"
+                     }`}>
+                       <div className="text-sm whitespace-pre-wrap break-words overflow-wrap-anywhere">
+                         {m.content}
+                       </div>
                       <div className={`text-xs mt-1 opacity-70 ${
                         m.role === "user" ? "text-primary-foreground/70" : "text-muted-foreground"
                       }`}>

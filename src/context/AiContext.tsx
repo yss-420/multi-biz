@@ -6,6 +6,7 @@ type AiContextValue = {
   messages: ChatMessage[];
   isLoading: boolean;
   ask: (input: string) => Promise<void>;
+  askAndReturn: (input: string) => Promise<string>;
   summarizeTasks: () => Promise<string>;
   generateTasksFromGoal: (goal: string) => Promise<{ text: string; suggestions: SuggestedTask[] }>;
   analyzeSubscriptions: () => Promise<{ summary: string; suggestions: SuggestedTask[] }>;
@@ -77,6 +78,7 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   };
 
   const ask = async (input: string): Promise<void> => { await askInternal(input, input); };
+  const askAndReturn = async (input: string): Promise<string> => { return await askInternal(input, input); };
 
   const summarizeTasks = async () => {
     const display = "Summarize my current tasks and suggest the top 3 next steps.";
@@ -109,10 +111,17 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     messages,
     isLoading,
     ask,
+    askAndReturn,
     summarizeTasks,
     generateTasksFromGoal,
     analyzeSubscriptions: async () => {
       const subs = subsForSelected;
+      const totalMonthlyCost = subs.reduce((sum, s) => {
+        const monthlyCost = s.cycle === "yearly" ? s.cost / 12 : 
+                           s.cycle === "quarterly" ? s.cost / 3 : s.cost;
+        return sum + monthlyCost;
+      }, 0);
+      
       const upcoming = subs
         .filter((s) => {
           const d = new Date(s.renewalDate).getTime();
@@ -121,45 +130,64 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         })
         .map((s) => `${s.serviceName} (${s.cycle}) – ${s.currency} ${s.cost} due ${new Date(s.renewalDate).toISOString().slice(0,10)}`)
         .join("\n");
+      
       const display = "Analyze subscriptions and prepare tasks for upcoming renewals";
       const model =
-        `You are helping plan renewals for ${currentBusiness?.name || "this business"}. ` +
-        `Upcoming renewals (30d):\n${upcoming || "(none)"}\n` +
-        `Provide a brief plain-text summary and then propose up to 5 actionable tasks in this JSON shape only: {"tasks":[{"title":"...","description":"...","priority":"low|medium|high","dueDate":"YYYY-MM-DD"}]}.`;
+        `Analyze subscriptions for ${currentBusiness?.name || "this business"}. ` +
+        `Current subscriptions: ${subs.length} total, estimated ${totalMonthlyCost.toFixed(2)} monthly cost.\n` +
+        `Upcoming renewals (30d):\n${upcoming || "(none)"}\n\n` +
+        `Provide a brief analysis of costs and renewal timeline. Then suggest specific actionable tasks. ` +
+        `Format response as readable text followed by JSON: {"tasks":[{"title":"...","description":"...","priority":"low|medium|high","dueDate":"YYYY-MM-DD"}]}.`;
+      
       const reply = await askInternal(display, model, { temperature: 0.2 });
+      
+      // Extract human-readable summary (everything before JSON)
+      const jsonMatch = reply.match(/\{[\s\S]*\}/);
+      const summary = jsonMatch ? reply.substring(0, reply.indexOf(jsonMatch[0])).trim() : reply;
+      
       const suggestions = parseSuggestedTasksFromText(reply);
-      const fallback = upcoming
-        ? `Upcoming renewals (30 days):\n${upcoming}`
-        : "No renewals in the next 30 days.";
-      const summary = reply && reply.trim().length > 0 ? reply : fallback;
-      return { summary, suggestions };
+      const fallbackSummary = upcoming
+        ? `You have ${subs.length} active subscriptions with ${totalMonthlyCost.toFixed(2)} estimated monthly cost.\n\nUpcoming renewals (30 days):\n${upcoming}`
+        : `You have ${subs.length} active subscriptions with ${totalMonthlyCost.toFixed(2)} estimated monthly cost.\n\nNo renewals in the next 30 days.`;
+      
+      return { 
+        summary: summary && summary.trim().length > 10 ? summary : fallbackSummary, 
+        suggestions 
+      };
     },
     refineTask: async (title: string, description?: string) => {
       const display = "Refine task title and description";
       const model =
-        `Refine the following task title and description for clarity and brevity. Return ONLY JSON {"title":"...","description":"..."}.\n` +
-        `Title: ${title}\nDescription: ${description || ""}`;
+        `Refine the following task title and description for clarity and brevity:\n` +
+        `Title: ${title}\nDescription: ${description || ""}\n\n` +
+        `Provide improved versions and return as JSON: {"title":"...","description":"..."}`;
       const text = await askInternal(display, model, { temperature: 0.2 });
+      
       try {
         const objMatch = text.match(/\{[\s\S]*\}/);
         if (objMatch) {
           const obj = JSON.parse(objMatch[0]);
-          return { title: typeof obj.title === "string" ? obj.title : undefined, description: typeof obj.description === "string" ? obj.description : undefined };
+          return { 
+            title: typeof obj.title === "string" ? obj.title : title, 
+            description: typeof obj.description === "string" ? obj.description : description 
+          };
         }
       } catch {}
+      
       // Fallback: try to parse simple "Title: ..." and "Description: ..." lines
       const tMatch = text.match(/title\s*:\s*(.+)/i);
       const dMatch = text.match(/description\s*:\s*([\s\S]+)/i);
-      const out: { title?: string; description?: string } = {};
-      if (tMatch && tMatch[1]) out.title = tMatch[1].trim();
-      if (dMatch && dMatch[1]) out.description = dMatch[1].trim();
-      return out;
+      return {
+        title: tMatch && tMatch[1] ? tMatch[1].trim() : title,
+        description: dMatch && dMatch[1] ? dMatch[1].trim() : description
+      };
     },
     splitTask: async (title: string, description?: string) => {
       const display = "Split task into subtasks";
       const model =
-        `Split the following task into 3-7 concrete subtasks. Prefer JSON under {"tasks":[{"title":"...","description":"..."}]}. If not, return numbered lines.\n` +
-        `Task: ${title}\nDetails: ${description || ""}`;
+        `Split the following task into 3-7 concrete subtasks:\n` +
+        `Task: ${title}\nDetails: ${description || ""}\n\n` +
+        `List each subtask clearly, then provide JSON: {"tasks":[{"title":"...","description":"...","priority":"medium"}]}`;
       const text = await askInternal(display, model, { temperature: 0.2 });
       return parseSuggestedTasksFromText(text);
     },
