@@ -136,22 +136,22 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         `Analyze subscriptions for ${currentBusiness?.name || "this business"}. ` +
         `Current subscriptions: ${subs.length} total, estimated ${totalMonthlyCost.toFixed(2)} monthly cost.\n` +
         `Upcoming renewals (30d):\n${upcoming || "(none)"}\n\n` +
-        `Provide a brief analysis of costs and renewal timeline. Then suggest specific actionable tasks. ` +
-        `Format response as readable text followed by JSON: {"tasks":[{"title":"...","description":"...","priority":"low|medium|high","dueDate":"YYYY-MM-DD"}]}.`;
+        `Provide a brief analysis of costs and renewal timeline in conversational text. ` +
+        `Then suggest specific actionable tasks for managing these subscriptions. ` +
+        `List tasks as simple numbered items (1. Task title - Description). No JSON or code blocks.`;
       
       const reply = await askInternal(display, model, { temperature: 0.2 });
       
-      // Extract human-readable summary (everything before JSON)
-      const jsonMatch = reply.match(/\{[\s\S]*\}/);
-      const summary = jsonMatch ? reply.substring(0, reply.indexOf(jsonMatch[0])).trim() : reply;
-      
+      // Clean any potential code artifacts
+      const cleanedReply = reply.replace(/```[^`]*```/g, '').replace(/\{[^}]*\}/g, '').trim();
       const suggestions = parseSuggestedTasksFromText(reply);
+      
       const fallbackSummary = upcoming
-        ? `You have ${subs.length} active subscriptions with ${totalMonthlyCost.toFixed(2)} estimated monthly cost.\n\nUpcoming renewals (30 days):\n${upcoming}`
-        : `You have ${subs.length} active subscriptions with ${totalMonthlyCost.toFixed(2)} estimated monthly cost.\n\nNo renewals in the next 30 days.`;
+        ? `You have ${subs.length} active subscriptions with estimated ${totalMonthlyCost.toFixed(2)} monthly cost.\n\nUpcoming renewals (30 days):\n${upcoming}`
+        : `You have ${subs.length} active subscriptions with estimated ${totalMonthlyCost.toFixed(2)} monthly cost.\n\nNo renewals in the next 30 days.`;
       
       return { 
-        summary: summary && summary.trim().length > 10 ? summary : fallbackSummary, 
+        summary: cleanedReply && cleanedReply.length > 10 ? cleanedReply : fallbackSummary, 
         suggestions 
       };
     },
@@ -160,25 +160,21 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const model =
         `Refine the following task title and description for clarity and brevity:\n` +
         `Title: ${title}\nDescription: ${description || ""}\n\n` +
-        `Provide improved versions and return as JSON: {"title":"...","description":"..."}`;
+        `Provide improved versions in this format:\n` +
+        `Title: [improved title]\n` +
+        `Description: [improved description]\n\n` +
+        `Use clear, actionable language. Do not include JSON or code blocks.`;
       const text = await askInternal(display, model, { temperature: 0.2 });
       
-      try {
-        const objMatch = text.match(/\{[\s\S]*\}/);
-        if (objMatch) {
-          const obj = JSON.parse(objMatch[0]);
-          return { 
-            title: typeof obj.title === "string" ? obj.title : title, 
-            description: typeof obj.description === "string" ? obj.description : description 
-          };
-        }
-      } catch {}
+      // Clean any potential code artifacts
+      const cleanedText = text.replace(/```[^`]*```/g, '').replace(/\{[^}]*\}/g, '').trim();
       
-      // Fallback: try to parse simple "Title: ..." and "Description: ..." lines
-      const tMatch = text.match(/title\s*:\s*(.+)/i);
-      const dMatch = text.match(/description\s*:\s*([\s\S]+)/i);
+      // Parse title and description from the response
+      const tMatch = cleanedText.match(/title\s*:\s*(.+)/i);
+      const dMatch = cleanedText.match(/description\s*:\s*([\s\S]+)/i);
+      
       return {
-        title: tMatch && tMatch[1] ? tMatch[1].trim() : title,
+        title: tMatch && tMatch[1] ? tMatch[1].trim().replace(/\n.*/, '') : title,
         description: dMatch && dMatch[1] ? dMatch[1].trim() : description
       };
     },
@@ -187,7 +183,11 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const model =
         `Split the following task into 3-7 concrete subtasks:\n` +
         `Task: ${title}\nDetails: ${description || ""}\n\n` +
-        `List each subtask clearly, then provide JSON: {"tasks":[{"title":"...","description":"...","priority":"medium"}]}`;
+        `List each subtask as numbered items:\n` +
+        `1. Subtask title - Brief description\n` +
+        `2. Subtask title - Brief description\n` +
+        `etc.\n\n` +
+        `Use clear, actionable language. Do not include JSON or code blocks.`;
       const text = await askInternal(display, model, { temperature: 0.2 });
       return parseSuggestedTasksFromText(text);
     },

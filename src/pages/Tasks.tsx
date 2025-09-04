@@ -39,6 +39,8 @@ export default function TasksPage() {
   const [editStatus, setEditStatus] = useState<Task["status"]>("todo");
   const [assistOpen, setAssistOpen] = useState(false);
   const [assistGoal, setAssistGoal] = useState("");
+  const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
+  const [aiSummary, setAiSummary] = useState("");
 
   useEffect(() => {
     document.title = `Tasks – ${currentBusiness?.name ?? "MultiBiz"}`;
@@ -462,23 +464,76 @@ export default function TasksPage() {
             <DialogTitle>AI Assist: Suggest tasks</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
-            <div className="grid gap-1">
-              <Label>Goal</Label>
-              <Input value={assistGoal} onChange={(e) => setAssistGoal(e.target.value)} placeholder="e.g., Ship onboarding flow" />
-            </div>
-            <div className="text-xs text-muted-foreground">The assistant will suggest concise tasks. You can copy and add them manually for now.</div>
+            {aiSuggestions.length === 0 ? (
+              <>
+                <div className="grid gap-1">
+                  <Label>Goal</Label>
+                  <Input value={assistGoal} onChange={(e) => setAssistGoal(e.target.value)} placeholder="e.g., Ship onboarding flow" />
+                </div>
+                <div className="text-xs text-muted-foreground">The assistant will suggest specific tasks to achieve your goal.</div>
+              </>
+            ) : (
+              <>
+                <div className="text-sm whitespace-pre-wrap bg-muted/40 p-2 rounded">{aiSummary}</div>
+                <div>
+                  <div className="font-semibold mb-2">Suggested tasks</div>
+                  <ul className="list-disc pl-5 space-y-1 text-sm">
+                    {aiSuggestions.map((t, i) => (
+                      <li key={i}>{t.title}</li>
+                    ))}
+                  </ul>
+                </div>
+              </>
+            )}
           </div>
           <DialogFooter>
+            {aiSuggestions.length === 0 ? (
+              <Button
+                onClick={async () => {
+                  if (!assistGoal.trim()) return;
+                  const res = await generateTasksFromGoal(assistGoal.trim());
+                  setAiSummary(res.text);
+                  setAiSuggestions(res.suggestions);
+                }}
+              >
+                Generate Tasks
+              </Button>
+            ) : (
+              <div className="flex gap-2">
                 <Button
-              onClick={async () => {
-                if (!assistGoal.trim()) return;
-                const res = await generateTasksFromGoal(assistGoal.trim());
-                // Optional: we could immediately offer to apply; for now it goes to chat and can be copied.
-                setAssistOpen(false);
-              }}
-            >
-              Ask AI
-            </Button>
+                  variant="secondary"
+                  onClick={() => {
+                    setAiSuggestions([]);
+                    setAiSummary("");
+                    setAssistGoal("");
+                  }}
+                >
+                  Start Over
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (!currentBusiness) return;
+                    aiSuggestions.forEach((t) => {
+                      addTask({
+                        businessId: currentBusiness.id,
+                        title: t.title,
+                        description: t.description,
+                        priority: (t.priority as any) || "medium",
+                        completed: false,
+                        status: "todo",
+                        dueDate: t.dueDate,
+                      });
+                    });
+                    setAssistOpen(false);
+                    setAiSuggestions([]);
+                    setAiSummary("");
+                    setAssistGoal("");
+                  }}
+                >
+                  Apply Tasks
+                </Button>
+              </div>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
