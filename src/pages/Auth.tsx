@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Github, Chrome, Sparkles } from "lucide-react";
+import { Chrome, Sparkles, Building2 } from "lucide-react";
 
 export default function AuthPage() {
   const { login, signup, user } = useAuth();
@@ -63,7 +63,7 @@ export default function AuthPage() {
     setIsLoading(false);
   };
 
-  const handleOAuthSignIn = async (provider: 'google' | 'github') => {
+  const handleOAuthSignIn = async (provider: 'google') => {
     setIsLoading(true);
     
     const { error } = await supabase.auth.signInWithOAuth({
@@ -109,21 +109,12 @@ export default function AuthPage() {
             <div className="space-y-3 mb-6">
               <Button
                 variant="outline"
-                className="w-full hover-scale"
+                className="w-full hover-scale transition-all duration-300 hover:bg-primary/5 hover:border-primary/50"
                 onClick={() => handleOAuthSignIn('google')}
                 disabled={isLoading}
               >
-                <Chrome className="mr-2 h-4 w-4" />
+                <Chrome className="mr-2 h-4 w-4 text-primary" />
                 Continue with Google
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full hover-scale"
-                onClick={() => handleOAuthSignIn('github')}
-                disabled={isLoading}
-              >
-                <Github className="mr-2 h-4 w-4" />
-                Continue with GitHub
               </Button>
             </div>
 

@@ -4,56 +4,33 @@ export async function aiChat(
   messages: ChatMessage[],
   options?: { model?: string; temperature?: number; max_tokens?: number }
 ) {
-  const API_KEY = "AIzaSyCew-NVl-fiA1wJyzmo7x5cJevueHidq9I";
-  const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent";
-  
-  console.log("Making direct Gemini API request with:", { messages, options });
+  console.log("Making AI request via edge function with:", { messages: messages.length, options });
   
   try {
-    // Convert messages to Gemini format
-    const contents = messages.map(msg => ({
-      role: msg.role === "assistant" ? "model" : "user",
-      parts: [{ text: msg.content }]
-    }));
-
-    const requestBody = {
-      contents,
-      generationConfig: {
-        temperature: options?.temperature ?? 0.2,
-        maxOutputTokens: options?.max_tokens ?? 384,
-      }
-    };
-
-    const res = await fetch(`${API_URL}?key=${API_KEY}`, {
+    const response = await fetch(`https://oejljvdpdmcabferfcqj.supabase.co/functions/v1/ai-chat`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(requestBody),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lamxqdmRwZG1jYWJmZXJmY3FqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3MTI0NjcsImV4cCI6MjA2OTI4ODQ2N30.b3Qe0Gn39YAmAqKcaHVwOYSseUsC3IYTIBayuOi6akI`
+      },
+      body: JSON.stringify({
+        messages,
+        temperature: options?.temperature ?? 0.2,
+        max_tokens: options?.max_tokens ?? 384,
+      }),
     });
 
-    const data = await res.json();
-    console.log("Gemini API response:", { status: res.status, data });
+    const data = await response.json();
+    console.log("Edge function response:", { status: response.status, data });
 
-    if (!res.ok) {
-      const errorMessage = data.error?.message || `Gemini API error: ${res.status}`;
-      console.error("Gemini API error:", errorMessage);
+    if (!response.ok) {
+      const errorMessage = data.error || `Edge function error: ${response.status}`;
+      console.error("Edge function error:", errorMessage);
       throw new Error(errorMessage);
     }
 
-    // Extract response content
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response";
-    
-    // Return in expected format
-    const result = {
-      choices: [{
-        message: {
-          role: "assistant",
-          content: content
-        }
-      }]
-    };
-    
-    console.log("Parsed AI result:", result);
-    return result;
+    console.log("Successfully received AI response");
+    return data;
   } catch (error) {
     console.error("AI chat error:", error);
     throw error;

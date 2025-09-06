@@ -48,25 +48,37 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background via-50% to-secondary/10 relative overflow-hidden">
-      {/* Animated Background */}
+      {/* Enhanced Animated Background */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-secondary/5 animate-pulse" />
         {floatingElements}
         
-        {/* Interactive Gradient Orb */}
+        {/* Enhanced Interactive Gradient Orb */}
         <div 
-          className="absolute w-96 h-96 bg-gradient-to-r from-primary/30 to-secondary/30 rounded-full blur-3xl transition-all duration-300 ease-out"
+          className="absolute w-96 h-96 bg-gradient-to-r from-primary/40 to-secondary/40 rounded-full blur-3xl transition-all duration-500 ease-out shadow-2xl shadow-primary/20"
           style={{
             left: mousePosition.x - 192,
             top: mousePosition.y - 192,
-            transform: 'translate(-50%, -50%)',
+            transform: `translate(-50%, -50%) scale(${1 + mousePosition.x * 0.0002}) rotate(${mousePosition.x * 0.05}deg)`,
           }}
         />
         
-        {/* Geometric Shapes */}
-        <div className="absolute top-20 left-20 w-32 h-32 border-2 border-primary/20 rounded-lg rotate-45 animate-spin" style={{ animationDuration: '20s' }} />
-        <div className="absolute bottom-20 right-20 w-24 h-24 bg-gradient-to-r from-secondary/30 to-primary/30 rounded-full animate-bounce" style={{ animationDuration: '3s' }} />
-        <div className="absolute top-1/2 right-10 w-16 h-16 border-2 border-secondary/30 rounded-full animate-ping" />
+        {/* Enhanced Geometric Shapes */}
+        <div className="absolute top-20 left-20 w-32 h-32 border-2 border-primary/30 rounded-lg rotate-45 animate-spin shadow-lg shadow-primary/20" style={{ animationDuration: '20s' }} />
+        <div className="absolute bottom-20 right-20 w-24 h-24 bg-gradient-to-r from-secondary/40 to-primary/40 rounded-full animate-bounce shadow-xl shadow-secondary/30" style={{ animationDuration: '3s' }} />
+        <div className="absolute top-1/2 right-10 w-16 h-16 border-2 border-secondary/40 rounded-full animate-ping shadow-lg shadow-secondary/25" />
+        
+        {/* Additional floating elements with glow */}
+        <div className="absolute top-32 left-1/4 w-4 h-4 bg-primary/60 rounded-full animate-bounce shadow-lg shadow-primary/40" style={{ animationDuration: '2.5s', animationDelay: '1s' }} />
+        <div className="absolute bottom-32 right-1/4 w-3 h-3 bg-secondary/60 rounded-full animate-bounce shadow-lg shadow-secondary/40" style={{ animationDuration: '3.5s', animationDelay: '0.5s' }} />
+        
+        {/* Animated grid overlay */}
+        <div className="absolute inset-0 opacity-[0.03]">
+          <div className="w-full h-full bg-gradient-to-r from-primary to-secondary" style={{
+            backgroundImage: 'linear-gradient(90deg, transparent 98%, hsl(var(--primary)) 100%), linear-gradient(180deg, transparent 98%, hsl(var(--primary)) 100%)',
+            backgroundSize: '100px 100px'
+          }} />
+        </div>
       </div>
 
       {/* Header */}
@@ -93,28 +105,33 @@ const Index = () => {
       <main className="relative z-10 container mx-auto px-4 py-16">
         <div className="text-center mb-16 animate-enter">
           <div className="relative inline-block mb-6">
-            <h2 className="text-6xl md:text-7xl font-bold bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent animate-fade-in">
-              Manage Multiple
+            <h2 className="text-6xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent animate-pulse" style={{ animationDuration: '4s' }}>
+              Your Personal Business Empire
             </h2>
-            <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-secondary/20 blur-xl -z-10 animate-pulse" />
+            <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-secondary/20 blur-2xl animate-pulse opacity-30" style={{ animationDuration: '3s' }} />
           </div>
           
           <h3 className="text-6xl md:text-7xl font-bold bg-gradient-to-r from-secondary via-primary to-secondary bg-clip-text text-transparent mb-8 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            Businesses
+            Command Center
           </h3>
           
           <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '0.4s' }}>
-            A comprehensive operations hub for managing subscriptions, tasks, notes, and team collaboration across all your business ventures.
+            Unite All Your Ventures. Amplify Your Success. Scale Without Limits.
           </p>
           
-          <div className="flex gap-4 justify-center animate-fade-in" style={{ animationDelay: '0.6s' }}>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: '0.6s' }}>
             <Link to="/auth">
-              <Button size="lg" className="text-lg px-8 hover-scale bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 shadow-lg">
-                Get Started <ArrowRight className="ml-2 h-5 w-5" />
+              <Button size="lg" className="px-8 py-6 text-lg hover-scale group relative overflow-hidden shadow-2xl shadow-primary/30">
+                <span className="relative z-10 flex items-center">
+                  Launch Your Empire
+                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/80 to-secondary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </Button>
             </Link>
-            <Button size="lg" variant="outline" className="text-lg px-8 hover-scale backdrop-blur-sm">
-              Watch Demo
+            <Button variant="outline" size="lg" className="px-8 py-6 text-lg hover-scale group border-2 hover:border-primary/50 transition-all duration-300 backdrop-blur-sm">
+              <Building2 className="mr-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
+              See It In Action
             </Button>
           </div>
         </div>
