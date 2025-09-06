@@ -63,14 +63,37 @@ export default function SettingsPage() {
 
       <Card className="p-4 space-y-3">
         <div className="font-semibold">AI Settings</div>
-        <div className="grid md:grid-cols-3 gap-3">
+        <div className="grid gap-3">
           <div className="grid gap-1">
-            <Label>Temperature</Label>
-            <Input type="number" step="0.1" value={aiTemp} onChange={(e) => setAiTemp(Number(e.target.value))} />
+            <Label>Your Gemini API Key (Optional)</Label>
+            <Input 
+              type="password" 
+              value={localStorage.getItem('gemini_api_key') || ''} 
+              onChange={(e) => {
+                if (e.target.value) {
+                  localStorage.setItem('gemini_api_key', e.target.value);
+                } else {
+                  localStorage.removeItem('gemini_api_key');
+                }
+              }}
+              placeholder="Enter your Gemini API key to use your own quota"
+            />
+            <div className="text-xs text-muted-foreground">
+              Get your free API key from{' '}
+              <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                Google AI Studio
+              </a>. If not provided, limited shared access will be used.
+            </div>
           </div>
-          <div className="grid gap-1">
-            <Label>Max tokens</Label>
-            <Input type="number" value={aiMax} onChange={(e) => setAiMax(Number(e.target.value))} />
+          <div className="grid md:grid-cols-2 gap-3">
+            <div className="grid gap-1">
+              <Label>Temperature</Label>
+              <Input type="number" step="0.1" value={aiTemp} onChange={(e) => setAiTemp(Number(e.target.value))} />
+            </div>
+            <div className="grid gap-1">
+              <Label>Max tokens</Label>
+              <Input type="number" value={aiMax} onChange={(e) => setAiMax(Number(e.target.value))} />
+            </div>
           </div>
         </div>
         <div className="flex justify-end">
