@@ -18,7 +18,7 @@ export default function SignupPage() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await signup({ email, password, role: "owner", name, phone });
+    await signup(email, password, name, phone);
   };
 
   return (

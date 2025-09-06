@@ -12,15 +12,11 @@ import { Trash2 } from "lucide-react";
 
 export default function SettingsPage() {
   const { settings, currentBusiness, businesses, updateBusiness, removeBusiness, updateSettings } = useData();
-  const { user, changePassword, requirePasswordCheck } = useAuth();
+  const { profile } = useAuth();
   const { toast } = useToast();
   const [days, setDays] = useState<number[]>(settings.reminderDays);
   const [aiTemp, setAiTemp] = useState<number>(settings.aiTemperature ?? 0.2);
   const [aiMax, setAiMax] = useState<number>(settings.aiMaxTokens ?? 384);
-
-  const [currentPwd, setCurrentPwd] = useState("");
-  const [newPwd, setNewPwd] = useState("");
-  const [confirmPwd, setConfirmPwd] = useState("");
 
   // Owner-only business editing state
   const [bizName, setBizName] = useState(currentBusiness?.name ?? "");
@@ -43,11 +39,11 @@ export default function SettingsPage() {
         <div className="grid md:grid-cols-2 gap-3">
           <div className="grid gap-1">
             <Label>Email</Label>
-            <Input value={user?.email || ""} readOnly />
+            <Input value={profile?.email || ""} readOnly />
           </div>
           <div className="grid gap-1">
             <Label>Role</Label>
-            <Input value={user?.role || ""} readOnly />
+            <Input value={profile?.role || ""} readOnly />
           </div>
         </div>
       </Card>
@@ -82,7 +78,7 @@ export default function SettingsPage() {
         </div>
       </Card>
 
-      {user?.role === "owner" && (
+      {profile?.role === "owner" && (
         <Card className="p-4 space-y-3">
           <div className="font-semibold">Business Details (Owner)</div>
           <div className="grid md:grid-cols-3 gap-3">
@@ -144,43 +140,9 @@ export default function SettingsPage() {
 
       <Card className="p-4 space-y-3">
         <div className="font-semibold">Administration</div>
-        {user?.role === "owner" && (
-          <div className="grid md:grid-cols-3 gap-3 pt-4">
-            <div className="grid gap-1">
-              <Label>Current password</Label>
-              <Input type="password" value={currentPwd} onChange={(e) => setCurrentPwd(e.target.value)} />
-            </div>
-            <div className="grid gap-1">
-              <Label>New password</Label>
-              <Input type="password" value={newPwd} onChange={(e) => setNewPwd(e.target.value)} />
-            </div>
-            <div className="grid gap-1">
-              <Label>Confirm new password</Label>
-              <Input type="password" value={confirmPwd} onChange={(e) => setConfirmPwd(e.target.value)} />
-            </div>
-            <div className="md:col-span-3">
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  if (!currentPwd || !newPwd || !confirmPwd) return;
-                  if (newPwd !== confirmPwd) {
-                    toast({ variant: "destructive", title: "Passwords do not match" });
-                    return;
-                  }
-                  const ok = changePassword(currentPwd, newPwd);
-                  if (ok) toast({ title: "Password updated" });
-                  else toast({ variant: "destructive", title: "Current password incorrect" });
-                  setCurrentPwd("");
-                  setNewPwd("");
-                  setConfirmPwd("");
-                }}
-              >
-                Change password
-              </Button>
-            </div>
-          </div>
-        )}
-        <div className="text-xs text-muted-foreground">Notifications are local-only and will trigger in-app while open.</div>
+        <div className="text-sm text-muted-foreground">
+          Password changes and advanced settings will be available in production version.
+        </div>
       </Card>
 
     </div>

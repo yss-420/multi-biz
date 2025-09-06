@@ -1,92 +1,160 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { User, Session } from "@supabase/supabase-js";
+import { toast } from "sonner";
 
 export type Role = "owner" | "member";
 
-export type User = {
+export type Profile = {
+  id: string;
+  user_id: string;
   email: string;
   name?: string;
   phone?: string;
   role: Role;
-  password: string; // Demo only (insecure). For production use Supabase auth.
-  verified: boolean;
+  created_at: string;
+  updated_at: string;
 };
 
 type AuthContextValue = {
   user: User | null;
-  login: (email: string, password: string, role?: Role) => Promise<void>;
-  signup: (user: Omit<User, "verified">) => Promise<void>;
-  logout: () => void;
+  profile: Profile | null;
+  session: Session | null;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<{ error?: string }>;
+  signup: (email: string, password: string, name?: string, phone?: string) => Promise<{ error?: string }>;
+  logout: () => Promise<void>;
   isOwner: boolean;
-  requirePasswordCheck: (password: string) => boolean;
-  changePassword: (current: string, next: string) => boolean;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-const LS_KEY = "multibiz_auth_v1";
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const stored = localStorage.getItem(LS_KEY);
-    if (stored) setUser(JSON.parse(stored));
-  }, []);
-
-  useEffect(() => {
-    if (user) localStorage.setItem(LS_KEY, JSON.stringify(user));
-    else localStorage.removeItem(LS_KEY);
-  }, [user]);
-
-  const login = async (email: string, password: string, role: Role = "owner") => {
-    // Demo: if an account exists in LS, validate password. Otherwise create session on the fly.
-    const stored = localStorage.getItem(LS_KEY);
-    if (stored) {
-      const u: User = JSON.parse(stored);
-      if (u.email.toLowerCase() === email.toLowerCase() && u.password === password) {
-        setUser(u);
-        navigate("/dashboard");
+  // Load profile data for authenticated user
+  const loadProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+      
+      if (error) {
+        console.error('Error loading profile:', error);
         return;
       }
+      
+      setProfile(data as Profile);
+    } catch (error) {
+      console.error('Error loading profile:', error);
     }
-    // Create ephemeral session
-    const newUser: User = { email, role, password, verified: true };
-    setUser(newUser);
-    navigate("/dashboard");
   };
 
-  const signup = async (payload: Omit<User, "verified">) => {
-    const newUser: User = { ...payload, verified: true };
-    setUser(newUser);
-    navigate("/dashboard");
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          loadProfile(session.user.id);
+        } else {
+          setProfile(null);
+        }
+        
+        setLoading(false);
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        loadProfile(session.user.id);
+      }
+      
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const login = async (email: string, password: string): Promise<{ error?: string }> => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        return { error: error.message };
+      }
+
+      navigate("/dashboard");
+      return {};
+    } catch (error) {
+      return { error: "An unexpected error occurred" };
+    }
   };
 
-  const logout = () => {
+  const signup = async (email: string, password: string, name?: string, phone?: string): Promise<{ error?: string }> => {
+    try {
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            name: name || email,
+            phone: phone || null,
+          }
+        }
+      });
+
+      if (error) {
+        return { error: error.message };
+      }
+
+      toast.success("Please check your email to verify your account");
+      navigate("/auth");
+      return {};
+    } catch (error) {
+      return { error: "An unexpected error occurred" };
+    }
+  };
+
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    navigate("/login");
-  };
-
-  const changePassword = (current: string, next: string) => {
-    if (!user) return false;
-    if (user.password !== current) return false;
-    const updated = { ...user, password: next };
-    setUser(updated);
-    return true;
+    setProfile(null);
+    setSession(null);
+    navigate("/auth");
   };
 
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
+      profile,
+      session,
+      loading,
       login,
       signup,
       logout,
-      isOwner: user?.role === "owner",
-      requirePasswordCheck: (password: string) => (user ? user.password === password : false),
-      changePassword,
+      isOwner: profile?.role === "owner",
     }),
-    [user]
+    [user, profile, session, loading]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -103,13 +171,13 @@ import { Navigate } from "react-router-dom";
 
 export const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/auth" replace />;
   return <>{children}</>;
 };
 
 export const RequireOwner: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user } = useAuth();
-  if (!user) return <Navigate to="/login" replace />;
-  if (user.role !== "owner") return <Navigate to="/dashboard" replace />;
+  const { user, profile } = useAuth();
+  if (!user) return <Navigate to="/auth" replace />;
+  if (profile?.role !== "owner") return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 };

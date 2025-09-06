@@ -4,12 +4,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useData } from "@/context/DataContext";
-import { useAuth } from "@/context/AuthContext";
+import { usePasswordCheck } from "@/hooks/usePasswordCheck";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function AddBusinessDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const { addBusiness, selectBusiness } = useData();
-  const { requirePasswordCheck } = useAuth();
+  const { requirePasswordCheck } = usePasswordCheck();
   const { toast } = useToast();
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");

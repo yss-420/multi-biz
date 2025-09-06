@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useData, ApiKey } from "@/context/DataContext";
-import { useAuth } from "@/context/AuthContext";
+import { usePasswordCheck } from "@/hooks/usePasswordCheck";
 import { RequireOwner } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 
 function VaultContent() {
   const { apiKeys, removeApiKey, addApiKey, currentBusiness } = useData();
-  const { requirePasswordCheck } = useAuth();
+  const { requirePasswordCheck } = usePasswordCheck();
   const { toast } = useToast();
   const [revealId, setRevealId] = useState<string | null>(null);
   const [step, setStep] = useState<1 | 2>(1);

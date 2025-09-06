@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RequireOwner, useAuth } from "@/context/AuthContext";
+import { usePasswordCheck } from "@/hooks/usePasswordCheck";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Pencil, Trash2 } from "lucide-react";
@@ -68,7 +69,7 @@ function TeamContent() {
   useEffect(() => { setRole((rolesByDept[department] ?? [""])[0]); }, [department]);
   const [edit, setEdit] = useState<TeamMember | null>(null);
   const [editOpen, setEditOpen] = useState(false);
-  const { requirePasswordCheck } = useAuth();
+  const { requirePasswordCheck } = usePasswordCheck();
   const toTitle = (s: string) => s.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
 
   useEffect(() => {

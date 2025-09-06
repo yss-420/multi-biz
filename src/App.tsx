@@ -3,21 +3,21 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import AppLayout from "./layouts/AppLayout";
-import { AuthProvider, RequireAuth } from "./context/AuthContext";
-import { DataProvider } from "./context/DataContext";
-import { AiProvider } from "./context/AiContext";
-import AiChat from "./components/AiChat";
-import Dashboard from "./pages/Dashboard";
-import SubscriptionsPage from "./pages/Subscriptions";
-import TasksPage from "./pages/Tasks";
-import NotesPage from "./pages/Notes";
-import VaultPage from "./pages/Vault";
-import TeamPage from "./pages/Team";
-import SettingsPage from "./pages/Settings";
-import LoginPage from "./pages/Login";
-import SignupPage from "./pages/Signup";
-import NotFound from "./pages/NotFound";
+import Index from "@/pages/Index";
+import Auth from "@/pages/Auth";
+import Dashboard from "@/pages/Dashboard";
+import Subscriptions from "@/pages/Subscriptions";
+import Tasks from "@/pages/Tasks";
+import Notes from "@/pages/Notes";
+import Team from "@/pages/Team";
+import Settings from "@/pages/Settings";
+import NotFound from "@/pages/NotFound";
+import Vault from "@/pages/Vault";
+import AppLayout from "@/layouts/AppLayout";
+import { AuthProvider, RequireAuth } from "@/context/AuthContext";
+import { DataProvider } from "@/context/DataContext";
+import { AiProvider } from "@/context/AiContext";
+import AiChat from "@/components/AiChat";
 
 const queryClient = new QueryClient();
 
@@ -30,34 +30,31 @@ const App = () => (
         <AuthProvider>
           <DataProvider>
             <AiProvider>
-            <Routes>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<SignupPage />} />
-              <Route
-                path="/"
-                element={<Navigate to="/dashboard" replace />}
-              />
-              <Route
-                path="/"
-                element={
-                  <RequireAuth>
-                    <AppLayout>
-                      {/* Nested routes render inside layout */}
-                    </AppLayout>
-                  </RequireAuth>
-                }
-              >
-                <Route path="dashboard" element={<Dashboard />} />
-                <Route path="subscriptions" element={<SubscriptionsPage />} />
-                <Route path="tasks" element={<TasksPage />} />
-                <Route path="notes" element={<NotesPage />} />
-                <Route path="vault" element={<VaultPage />} />
-                <Route path="team" element={<TeamPage />} />
-                <Route path="settings" element={<SettingsPage />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <AiChat />
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/login" element={<Navigate to="/auth" replace />} />
+                <Route path="/signup" element={<Navigate to="/auth" replace />} />
+                <Route
+                  path="/*"
+                  element={
+                    <RequireAuth>
+                      <AppLayout />
+                    </RequireAuth>
+                  }
+                >
+                  <Route path="" element={<Navigate to="dashboard" replace />} />
+                  <Route path="dashboard" element={<Dashboard />} />
+                  <Route path="subscriptions" element={<Subscriptions />} />
+                  <Route path="tasks" element={<Tasks />} />
+                  <Route path="notes" element={<Notes />} />
+                  <Route path="vault" element={<Vault />} />
+                  <Route path="team" element={<Team />} />
+                  <Route path="settings" element={<Settings />} />
+                  <Route path="*" element={<NotFound />} />
+                </Route>
+              </Routes>
+              <AiChat />
             </AiProvider>
           </DataProvider>
         </AuthProvider>
