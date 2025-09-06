@@ -375,6 +375,10 @@ export type Database = {
         Args: { business_id: string }
         Returns: boolean
       }
+      validate_api_key_access: {
+        Args: { api_key_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
