@@ -34,9 +34,11 @@ export type Task = {
 export type ApiKey = {
   id: ID;
   businessId: ID;
-  label: string;
+  name: string;
   provider?: string;
-  secret: string;
+  description?: string;
+  keyValue?: string; // Only populated when decrypted
+  isDecrypted?: boolean;
   createdAt: string;
   lastUsedAt?: string;
 };
@@ -90,8 +92,10 @@ type DataContextValue = DataState & {
   toggleTask: (id: ID) => void;
   updateTask: (id: ID, patch: Partial<Task>) => void;
   removeTask: (id: ID) => void;
-  addApiKey: (k: Omit<ApiKey, "id" | "createdAt">) => void;
-  removeApiKey: (id: ID) => void;
+  addApiKey: (name: string, keyValue: string, description?: string) => Promise<void>;
+  removeApiKey: (id: ID) => Promise<void>;
+  decryptApiKey: (id: ID) => Promise<string>;
+  loadBusinessApiKeys: (businessId: ID) => Promise<void>;
   addTeamMember: (m: Omit<TeamMember, "id" | "status">) => void;
   assignMemberToBusinesses: (memberId: ID, businessIds: ID[]) => void;
   updateTeamMember: (memberId: ID, patch: Partial<TeamMember>) => void;
@@ -194,10 +198,97 @@ const removeBusiness = (id: ID) =>
 
     const removeTask = (id: ID) => setState((st) => ({ ...st, tasks: st.tasks.filter((t) => t.id !== id) }));
 
-    const addApiKey = (k: Omit<ApiKey, "id" | "createdAt">) =>
-      setState((st) => ({ ...st, apiKeys: [{ id: uid(), createdAt: new Date().toISOString(), ...k }, ...st.apiKeys] }));
+    const addApiKey = async (name: string, keyValue: string, description?: string) => {
+      if (!currentBusiness?.id) throw new Error('No business selected');
+      
+      try {
+        const { encryptApiKey, getBusinessApiKeys } = await import('@/lib/encryption');
+        await encryptApiKey(currentBusiness.id, name, keyValue, description);
+        
+        // Reload API keys for the current business
+        const apiKeys = await getBusinessApiKeys(currentBusiness.id);
+        const mappedKeys: ApiKey[] = apiKeys.map(key => ({
+          id: key.id,
+          businessId: key.business_id,
+          name: key.name,
+          description: key.description,
+          createdAt: key.created_at,
+          isDecrypted: false
+        }));
+        
+        setState(st => ({ ...st, apiKeys: mappedKeys }));
+      } catch (error) {
+        console.error('Failed to add API key:', error);
+        throw error;
+      }
+    };
 
-    const removeApiKey = (id: ID) => setState((st) => ({ ...st, apiKeys: st.apiKeys.filter((k) => k.id !== id) }));
+    const removeApiKey = async (id: ID) => {
+      try {
+        const { deleteApiKey, getBusinessApiKeys } = await import('@/lib/encryption');
+        await deleteApiKey(id);
+        
+        // Reload API keys for the current business
+        if (currentBusiness?.id) {
+          const apiKeys = await getBusinessApiKeys(currentBusiness.id);
+          const mappedKeys: ApiKey[] = apiKeys.map(key => ({
+            id: key.id,
+            businessId: key.business_id,
+            name: key.name,
+            description: key.description,
+            createdAt: key.created_at,
+            isDecrypted: false
+          }));
+          
+          setState(st => ({ ...st, apiKeys: mappedKeys }));
+        }
+      } catch (error) {
+        console.error('Failed to remove API key:', error);
+        throw error;
+      }
+    };
+
+    const decryptApiKey = async (id: ID): Promise<string> => {
+      try {
+        const { decryptApiKey } = await import('@/lib/encryption');
+        const decryptedValue = await decryptApiKey(id);
+        
+        // Update the local state to mark this key as decrypted
+        setState(st => ({
+          ...st,
+          apiKeys: st.apiKeys.map(key => 
+            key.id === id 
+              ? { ...key, keyValue: decryptedValue, isDecrypted: true }
+              : key
+          )
+        }));
+        
+        return decryptedValue;
+      } catch (error) {
+        console.error('Failed to decrypt API key:', error);
+        throw error;
+      }
+    };
+
+    const loadBusinessApiKeys = async (businessId: ID) => {
+      try {
+        const { getBusinessApiKeys } = await import('@/lib/encryption');
+        const apiKeys = await getBusinessApiKeys(businessId);
+        const mappedKeys: ApiKey[] = apiKeys.map(key => ({
+          id: key.id,
+          businessId: key.business_id,
+          name: key.name,
+          description: key.description,
+          createdAt: key.created_at,
+          isDecrypted: false
+        }));
+        
+        setState(st => ({ ...st, apiKeys: mappedKeys }));
+      } catch (error) {
+        console.error('Failed to load API keys:', error);
+        throw error;
+      }
+    };
 
     const addTeamMember = (m: Omit<TeamMember, "id" | "status">) =>
       setState((st) => ({ ...st, team: [...st.team, { id: uid(), status: "active", ...m }] }));
@@ -281,6 +372,8 @@ return {
   removeTask,
   addApiKey,
   removeApiKey,
+  decryptApiKey,
+  loadBusinessApiKeys,
   addTeamMember,
   assignMemberToBusinesses,
   updateTeamMember,
