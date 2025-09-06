@@ -112,7 +112,7 @@ const Index = () => {
             
             <div className="space-y-6 px-6">
               <p className="text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed px-4">
-                The ultimate platform for managing multiple businesses, scaling operations, and building your entrepreneurial empire from one powerful dashboard.
+                The ultimate platform for managing multiple businesses, scaling operations, and building your entrepreneurial empire from one AI-powered dashboard.
               </p>
             </div>
           </div>

@@ -116,28 +116,9 @@ export const ScalingBusinessAnimation = () => {
           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
           
           <div className="relative z-10 max-w-4xl mx-auto">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent animate-fade-in leading-tight mb-6">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent animate-fade-in leading-tight">
               Your Personal Business Empire Command Center
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground animate-fade-in px-4" style={{ animationDelay: '0.5s' }}>
-              Manage Multiple Businesses. Scale Your Success. All From One Dashboard.
-            </p>
-            <div className="mt-8 animate-fade-in" style={{ animationDelay: '1s' }}>
-              <div className="flex items-center justify-center gap-8 text-sm text-muted-foreground/80">
-                <span className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                  Task Management
-                </span>
-                <span className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
-                  Team Collaboration  
-                </span>
-                <span className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-                  Business Analytics
-                </span>
-              </div>
-            </div>
           </div>
         </div>
       )}
