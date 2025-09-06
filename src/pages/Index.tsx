@@ -105,19 +105,19 @@ const Index = () => {
       {/* Hero Section */}
       <main className="relative z-10 container mx-auto px-4 py-16">
         <div className="text-center mb-16 animate-enter">
-          <div className="mb-12 animate-fade-in">
-            <div className="relative mb-16 h-96 flex items-center justify-center">
+          <div className="mb-8 animate-fade-in">
+            <div className="relative mb-8 h-96 flex items-center justify-center">
               <ScalingBusinessAnimation />
             </div>
             
-            <div className="space-y-8 px-6">
+            <div className="space-y-6 px-6">
               <p className="text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed px-4">
                 The ultimate platform for managing multiple businesses, scaling operations, and building your entrepreneurial empire from one powerful dashboard.
               </p>
             </div>
           </div>
           
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center pt-12 animate-fade-in" style={{ animationDelay: '0.6s' }}>
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center pt-6 animate-fade-in" style={{ animationDelay: '0.6s' }}>
             <Link to="/auth">
               <Button size="lg" className="px-10 py-6 text-lg hover-scale group relative overflow-hidden shadow-2xl shadow-primary/30 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 border-0">
                 <span className="relative z-10 flex items-center">
