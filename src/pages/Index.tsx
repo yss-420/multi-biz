@@ -112,7 +112,7 @@ const Index = () => {
             
             <div className="space-y-6 px-6">
               <p className="text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed px-4">
-                The ultimate platform for managing multiple businesses, scaling operations, and building your entrepreneurial empire from one AI-powered dashboard.
+                The ultimate platform for managing multiple businesses, scaling operations, and building your entrepreneurial empire from a unified AI-powered dashboard.
               </p>
             </div>
           </div>
@@ -143,12 +143,12 @@ const Index = () => {
           ].map(({ icon: Icon, title, desc, delay }, index) => (
             <div 
               key={index}
-              className="group text-center p-8 rounded-xl border bg-card/80 backdrop-blur-sm hover:bg-card transition-all duration-300 hover:shadow-2xl hover:shadow-primary/20 hover:-translate-y-2 animate-fade-in"
+              className="group text-center p-8 rounded-xl border bg-card/80 backdrop-blur-sm hover:bg-card transition-all duration-500 hover:shadow-2xl hover:shadow-primary/20 hover:-translate-y-4 hover:scale-105 animate-fade-in"
               style={{ animationDelay: delay }}
             >
               <div className="relative mb-6">
-                <Icon className="h-16 w-16 text-primary mx-auto group-hover:scale-110 transition-transform duration-300" />
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <Icon className="h-16 w-16 text-primary mx-auto group-hover:scale-125 transition-transform duration-500 animate-pulse" style={{ animationDuration: `${3 + index}s` }} />
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-ping" />
               </div>
               <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors duration-300">{title}</h3>
               <p className="text-muted-foreground leading-relaxed">{desc}</p>
@@ -212,14 +212,14 @@ const Index = () => {
             ].map(({ icon: Icon, title, desc, gradient }, index) => (
               <div 
                 key={index}
-                className="group relative p-8 rounded-xl border bg-card/80 backdrop-blur-sm hover:bg-card transition-all duration-300 hover:shadow-2xl hover:shadow-primary/20 hover:-translate-y-2 animate-fade-in overflow-hidden"
+                className="group relative p-8 rounded-xl border bg-card/80 backdrop-blur-sm hover:bg-card transition-all duration-500 hover:shadow-2xl hover:shadow-primary/20 hover:-translate-y-4 hover:scale-105 animate-fade-in overflow-hidden"
                 style={{ animationDelay: `${0.1 * index}s` }}
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse`} />
                 <div className="relative z-10">
                   <div className="relative mb-6">
-                    <Icon className="h-12 w-12 text-primary group-hover:scale-110 transition-transform duration-300" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <Icon className="h-12 w-12 text-primary group-hover:scale-125 transition-transform duration-500 animate-bounce" style={{ animationDuration: `${2 + index * 0.3}s`, animationDelay: `${index * 0.2}s` }} />
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-ping" />
                   </div>
                   <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors duration-300">{title}</h3>
                   <p className="text-muted-foreground leading-relaxed">{desc}</p>
@@ -237,28 +237,47 @@ const Index = () => {
             { number: "99.9%", label: "Uptime", icon: Zap },
             { number: "24/7", label: "Support", icon: Shield }
           ].map(({ number, label, icon: Icon }, index) => (
-            <div key={index} className="text-center group hover-scale">
-              <Icon className="h-8 w-8 text-primary mx-auto mb-2 group-hover:animate-pulse" />
-              <div className="text-3xl font-bold text-primary mb-1">{number}</div>
-              <div className="text-sm text-muted-foreground">{label}</div>
+            <div key={index} className="text-center group hover-scale relative">
+              <div className="absolute -inset-4 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse" />
+              <Icon className="h-8 w-8 text-primary mx-auto mb-2 group-hover:animate-bounce animate-pulse relative z-10" style={{ animationDuration: `${2 + index * 0.5}s`, animationDelay: `${index * 0.3}s` }} />
+              <div className="text-3xl font-bold text-primary mb-1 relative z-10">{number}</div>
+              <div className="text-sm text-muted-foreground relative z-10">{label}</div>
             </div>
           ))}
         </div>
 
         {/* CTA Section */}
-        <div className="text-center bg-gradient-to-r from-card/80 to-card/60 border rounded-2xl p-12 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 animate-fade-in" style={{ animationDelay: '1s' }}>
-          <Globe className="h-16 w-16 text-primary mx-auto mb-6 animate-spin" style={{ animationDuration: '20s' }} />
-          <h3 className="text-3xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            Ready to streamline your business operations?
-          </h3>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-            Join thousands of entrepreneurs who trust MultiBiz to manage their business operations efficiently.
-          </p>
-          <Link to="/auth">
-            <Button size="lg" className="text-lg px-12 hover-scale bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 shadow-xl">
-              Start Free Trial <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </Link>
+        <div className="relative text-center bg-gradient-to-r from-card/80 to-card/60 border rounded-2xl p-12 backdrop-blur-sm hover:shadow-2xl transition-all duration-500 animate-fade-in overflow-hidden group" style={{ animationDelay: '1s' }}>
+          {/* Floating background elements */}
+          <div className="absolute inset-0">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={i}
+                className="absolute w-3 h-3 bg-primary/20 rounded-full animate-bounce opacity-40"
+                style={{
+                  left: `${10 + Math.random() * 80}%`,
+                  top: `${10 + Math.random() * 80}%`,
+                  animationDelay: `${i * 0.7}s`,
+                  animationDuration: `${3 + Math.random() * 2}s`
+                }}
+              />
+            ))}
+          </div>
+          
+          <div className="relative z-10">
+            <Globe className="h-16 w-16 text-primary mx-auto mb-6 animate-spin group-hover:animate-pulse" style={{ animationDuration: '20s' }} />
+            <h3 className="text-3xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent animate-pulse">
+              Ready to streamline your business operations?
+            </h3>
+            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
+              Join thousands of entrepreneurs who trust MultiBiz to manage their business operations efficiently.
+            </p>
+            <Link to="/auth">
+              <Button size="lg" className="text-lg px-12 hover-scale bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 shadow-xl hover:shadow-2xl hover:shadow-primary/30 transition-all duration-300 animate-pulse group-hover:animate-bounce">
+                Start Free Trial <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </main>
 
