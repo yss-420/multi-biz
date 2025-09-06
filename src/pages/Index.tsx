@@ -105,27 +105,48 @@ const Index = () => {
       {/* Hero Section */}
       <main className="relative z-10 container mx-auto px-4 py-16">
         <div className="text-center mb-16 animate-enter">
-          <div className="mb-8 animate-fade-in">
-            <div className="relative mb-8 h-32 flex items-center justify-center">
+          <div className="mb-12 animate-fade-in">
+            <div className="relative mb-16 h-96 flex items-center justify-center">
               <ScalingBusinessAnimation />
             </div>
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Unite All Your Ventures. Amplify Your Success. Scale Without Limits.
-            </p>
+            
+            <div className="space-y-8 px-6">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-tight">
+                <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+                  Your Personal Business Empire Command Center
+                </span>
+              </h1>
+              <p className="text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed px-4">
+                The ultimate platform for managing multiple businesses, scaling operations, and building your entrepreneurial empire from one powerful dashboard.
+              </p>
+              <div className="flex items-center justify-center gap-8 text-sm text-muted-foreground/80 pt-4">
+                <span className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  Multi-Business Management
+                </span>
+                <span className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
+                  Team Collaboration  
+                </span>
+                <span className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+                  Business Analytics
+                </span>
+              </div>
+            </div>
           </div>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: '0.6s' }}>
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center pt-12 animate-fade-in" style={{ animationDelay: '0.6s' }}>
             <Link to="/auth">
-              <Button size="lg" className="px-8 py-6 text-lg hover-scale group relative overflow-hidden shadow-2xl shadow-primary/30">
+              <Button size="lg" className="px-10 py-6 text-lg hover-scale group relative overflow-hidden shadow-2xl shadow-primary/30 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 border-0">
                 <span className="relative z-10 flex items-center">
                   Launch Your Empire
-                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  <Building2 className="ml-3 h-6 w-6 transition-transform group-hover:scale-110" />
                 </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/80 to-secondary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </Button>
             </Link>
-            <Button variant="outline" size="lg" className="px-8 py-6 text-lg hover-scale group border-2 hover:border-primary/50 transition-all duration-300 backdrop-blur-sm">
-              <Building2 className="mr-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
+            <Button variant="outline" size="lg" className="px-10 py-6 text-lg hover-scale group border-2 hover:border-primary/50 transition-all duration-300 backdrop-blur-sm hover:bg-primary/5">
+              <Sparkles className="mr-3 h-6 w-6 group-hover:rotate-12 transition-transform" />
               See It In Action
             </Button>
           </div>

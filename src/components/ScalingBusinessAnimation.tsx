@@ -111,15 +111,33 @@ export const ScalingBusinessAnimation = () => {
 
       {/* Text Reveal with Enhanced Effects */}
       {phase === 'text' && (
-        <div className="absolute inset-0 flex items-center justify-center text-center px-4">
-          <div className="relative">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent animate-fade-in leading-tight">
-              Transform Multiple Businesses Into Your Empire
+        <div className="absolute inset-0 flex items-center justify-center text-center px-8 py-12">
+          {/* Dark overlay for better text readability */}
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
+          
+          <div className="relative z-10 max-w-4xl mx-auto">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent animate-fade-in leading-tight mb-6">
+              Your Personal Business Empire Command Center
             </h1>
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 blur-xl animate-pulse" />
-            <p className="text-lg md:text-xl text-muted-foreground mt-4 animate-fade-in" style={{ animationDelay: '0.5s' }}>
-              One Command Center. Infinite Possibilities.
+            <p className="text-lg md:text-xl text-muted-foreground animate-fade-in px-4" style={{ animationDelay: '0.5s' }}>
+              Manage Multiple Businesses. Scale Your Success. All From One Dashboard.
             </p>
+            <div className="mt-8 animate-fade-in" style={{ animationDelay: '1s' }}>
+              <div className="flex items-center justify-center gap-8 text-sm text-muted-foreground/80">
+                <span className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  Task Management
+                </span>
+                <span className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
+                  Team Collaboration  
+                </span>
+                <span className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+                  Business Analytics
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       )}
