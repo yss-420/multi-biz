@@ -111,28 +111,9 @@ const Index = () => {
             </div>
             
             <div className="space-y-8 px-6">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-tight">
-                <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-                  Your Personal Business Empire Command Center
-                </span>
-              </h1>
               <p className="text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed px-4">
                 The ultimate platform for managing multiple businesses, scaling operations, and building your entrepreneurial empire from one powerful dashboard.
               </p>
-              <div className="flex items-center justify-center gap-8 text-sm text-muted-foreground/80 pt-4">
-                <span className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                  Multi-Business Management
-                </span>
-                <span className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
-                  Team Collaboration  
-                </span>
-                <span className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-                  Business Analytics
-                </span>
-              </div>
             </div>
           </div>
           

@@ -121,63 +121,15 @@ const initialState = (): DataState => {
       notes: parsedData.notes || []
     };
   }
-  const biz1: Business = { id: uid(), name: "Secret Share", color: "biz-blue" };
-  const today = new Date();
-  const inDays = (d: number) => new Date(today.getTime() + d * 86400000).toISOString();
+
+  // For new users, start with empty state - they'll create their first business in onboarding
   return {
-    businesses: [biz1],
-    selectedBusinessId: biz1.id,
-    subscriptions: [
-      {
-        id: uid(),
-        businessId: biz1.id,
-        serviceName: "Lovable",
-        cost: 25,
-        currency: "USD",
-        cycle: "monthly",
-        renewalDate: inDays(20),
-        autoRenew: true,
-        notes: "Not on auto-renew (demo)",
-        status: "active",
-        subscriptionType: "ongoing",
-      },
-      {
-        id: uid(),
-        businessId: biz1.id,
-        serviceName: "Claude",
-        cost: 23,
-        currency: "USD",
-        cycle: "monthly",
-        renewalDate: inDays(5),
-        autoRenew: true,
-        status: "active",
-        subscriptionType: "ongoing",
-      },
-    ],
-    tasks: [
-      {
-        id: uid(),
-        businessId: biz1.id,
-        title: "Make MultiBiz via Lovable",
-        description: "Frontend-only MVP",
-        completed: false,
-        priority: "high",
-        dueDate: inDays(1),
-      },
-    ],
-    apiKeys: [
-      {
-        id: uid(),
-        businessId: biz1.id,
-        label: "Supabase Key",
-        provider: "Supabase",
-        secret: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.DEMO",
-        createdAt: new Date().toISOString(),
-      },
-    ],
-    team: [
-      { id: uid(), name: "Manav", email: "you@example.com", assignedBusinessIds: [biz1.id], status: "active" },
-    ],
+    businesses: [],
+    selectedBusinessId: "",
+    subscriptions: [],
+    tasks: [],
+    apiKeys: [],
+    team: [],
     settings: { reminderDays: [3, 1], aiTemperature: 0.2, aiMaxTokens: 384 },
     notes: [],
   };

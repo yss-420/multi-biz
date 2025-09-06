@@ -15,10 +15,12 @@ import Settings from "@/pages/Settings";
 import NotFound from "@/pages/NotFound";
 import Vault from "@/pages/Vault";
 import AppLayout from "@/layouts/AppLayout";
-import { AuthProvider, RequireAuth } from "@/context/AuthContext";
+import { AuthProvider, RequireAuth, RequireOnboarding } from "@/context/AuthContext";
 import { DataProvider } from "@/context/DataContext";
 import { AiProvider } from "@/context/AiContext";
 import AiChat from "@/components/AiChat";
+
+import OnboardingFlow from "@/components/OnboardingFlow";
 
 const queryClient = new QueryClient();
 
@@ -35,14 +37,19 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/auth/callback" element={<AuthCallback />} />
+                <Route path="/onboarding" element={
+                  <RequireAuth>
+                    <OnboardingFlow />
+                  </RequireAuth>
+                } />
                 <Route path="/login" element={<Navigate to="/auth" replace />} />
                 <Route path="/signup" element={<Navigate to="/auth" replace />} />
                 <Route
                   path="/*"
                   element={
-                    <RequireAuth>
+                    <RequireOnboarding>
                       <AppLayout />
-                    </RequireAuth>
+                    </RequireOnboarding>
                   }
                 >
                   <Route path="" element={<Navigate to="dashboard" replace />} />

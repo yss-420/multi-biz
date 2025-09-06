@@ -129,6 +129,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       toast.success("Please check your email to verify your account");
+      // After successful signup, redirect to onboarding
+      navigate("/onboarding");
       return {};
     } catch (error) {
       return { error: "An unexpected error occurred" };
@@ -192,6 +194,20 @@ import { Navigate } from "react-router-dom";
 export const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   if (!user) return <Navigate to="/auth" replace />;
+  return <>{children}</>;
+};
+
+export const RequireOnboarding: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
+  
+  if (!user) return <Navigate to="/auth" replace />;
+  
+  // Check if user has completed onboarding by checking if they have businesses
+  const businesses = JSON.parse(localStorage.getItem("multibiz_data_v1") || "{}").businesses || [];
+  if (businesses.length === 0) {
+    return <Navigate to="/onboarding" replace />;
+  }
+  
   return <>{children}</>;
 };
 
