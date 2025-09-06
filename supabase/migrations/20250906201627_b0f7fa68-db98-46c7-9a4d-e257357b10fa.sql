@@ -1,0 +1,2 @@
+-- Update the ai-chat edge function to check for user API keys
+-- This migration adds support for user-provided Gemini API keys

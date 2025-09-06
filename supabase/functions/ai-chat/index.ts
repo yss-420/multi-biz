@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, temperature = 0.2, max_tokens = 384 } = await req.json();
+    const { messages, temperature = 0.2, max_tokens = 384, user_api_key } = await req.json();
     
     if (!messages || !Array.isArray(messages)) {
       return new Response(JSON.stringify({ error: "Invalid messages format" }), {
@@ -22,16 +22,17 @@ serve(async (req) => {
       });
     }
 
-    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+    // Use user's API key if provided, otherwise fall back to system key
+    const GEMINI_API_KEY = user_api_key || Deno.env.get('GEMINI_API_KEY');
     if (!GEMINI_API_KEY) {
-      console.error('GEMINI_API_KEY not found in environment variables');
-      return new Response(JSON.stringify({ error: "API key not configured" }), {
+      console.error('No Gemini API key available');
+      return new Response(JSON.stringify({ error: "No API key available. Please add your Gemini API key in Settings." }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    console.log('Making Gemini API request with messages:', messages.length);
+    console.log('Making Gemini API request with messages:', messages.length, 'using', user_api_key ? 'user' : 'system', 'API key');
 
     // Convert messages to Gemini format
     const contents = messages.map((msg: any) => ({

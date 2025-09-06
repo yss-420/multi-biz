@@ -7,6 +7,9 @@ export async function aiChat(
   console.log("Making AI request via edge function with:", { messages: messages.length, options });
   
   try {
+    // Get user's API key from localStorage if available
+    const userApiKey = localStorage.getItem('gemini_api_key');
+    
     const response = await fetch(`https://oejljvdpdmcabferfcqj.supabase.co/functions/v1/ai-chat`, {
       method: "POST",
       headers: {
@@ -17,6 +20,7 @@ export async function aiChat(
         messages,
         temperature: options?.temperature ?? 0.2,
         max_tokens: options?.max_tokens ?? 384,
+        user_api_key: userApiKey,
       }),
     });
 
