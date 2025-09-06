@@ -160,11 +160,11 @@ const Index = () => {
         <div className="mb-16 animate-fade-in" style={{ animationDelay: '0.4s' }}>
           <div className="text-center mb-12">
             <div className="flex items-center justify-center mb-4">
-              <Sparkles className="h-8 w-8 text-primary mr-3 animate-pulse" />
+              <Sparkles className="h-8 w-8 text-primary mr-3" />
               <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                 AI-Powered Business Intelligence
               </h2>
-              <Sparkles className="h-8 w-8 text-primary ml-3 animate-pulse" />
+              <Sparkles className="h-8 w-8 text-primary ml-3" />
             </div>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
               Leverage cutting-edge AI to streamline operations, generate insights, and accelerate your entrepreneurial journey.
@@ -215,11 +215,11 @@ const Index = () => {
                 className="group relative p-8 rounded-xl border bg-card/80 backdrop-blur-sm hover:bg-card transition-all duration-500 hover:shadow-2xl hover:shadow-primary/20 hover:-translate-y-4 hover:scale-105 animate-fade-in overflow-hidden"
                 style={{ animationDelay: `${0.1 * index}s` }}
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse`} />
+                <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
                 <div className="relative z-10">
                   <div className="relative mb-6">
-                    <Icon className="h-12 w-12 text-primary group-hover:scale-125 transition-transform duration-500 animate-bounce" style={{ animationDuration: `${2 + index * 0.3}s`, animationDelay: `${index * 0.2}s` }} />
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-ping" />
+                    <Icon className="h-12 w-12 text-primary group-hover:scale-125 transition-transform duration-500" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </div>
                   <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors duration-300">{title}</h3>
                   <p className="text-muted-foreground leading-relaxed">{desc}</p>
@@ -265,15 +265,15 @@ const Index = () => {
           </div>
           
           <div className="relative z-10">
-            <Globe className="h-16 w-16 text-primary mx-auto mb-6 animate-spin group-hover:animate-pulse" style={{ animationDuration: '20s' }} />
-            <h3 className="text-3xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent animate-pulse">
+            <Globe className="h-16 w-16 text-primary mx-auto mb-6 animate-spin group-hover:scale-110 transition-transform duration-300" style={{ animationDuration: '20s' }} />
+            <h3 className="text-3xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               Ready to streamline your business operations?
             </h3>
             <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
               Join thousands of entrepreneurs who trust MultiBiz to manage their business operations efficiently.
             </p>
             <Link to="/auth">
-              <Button size="lg" className="text-lg px-12 hover-scale bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 shadow-xl hover:shadow-2xl hover:shadow-primary/30 transition-all duration-300 animate-pulse group-hover:animate-bounce">
+              <Button size="lg" className="text-lg px-12 hover-scale bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 shadow-xl hover:shadow-2xl hover:shadow-primary/30 transition-all duration-300">
                 Start Free Trial <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
