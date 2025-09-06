@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { Chrome, Sparkles, Building2 } from "lucide-react";
 
 export default function AuthPage() {
-  const { login, signup, user } = useAuth();
+  const { login, signup, signInWithGoogle, user } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -63,18 +63,13 @@ export default function AuthPage() {
     setIsLoading(false);
   };
 
-  const handleOAuthSignIn = async (provider: 'google') => {
+  const handleOAuthSignIn = async () => {
     setIsLoading(true);
     
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: provider,
-      options: {
-        redirectTo: `${window.location.origin}/dashboard`,
-      }
-    });
-
+    const { error } = await signInWithGoogle();
+    
     if (error) {
-      toast.error(`Failed to sign in with ${provider}: ${error.message}`);
+      toast.error(`Failed to sign in with Google: ${error}`);
     }
     
     setIsLoading(false);
@@ -110,7 +105,7 @@ export default function AuthPage() {
               <Button
                 variant="outline"
                 className="w-full hover-scale transition-all duration-300 hover:bg-primary/5 hover:border-primary/50"
-                onClick={() => handleOAuthSignIn('google')}
+                onClick={handleOAuthSignIn}
                 disabled={isLoading}
               >
                 <Chrome className="mr-2 h-4 w-4 text-primary" />

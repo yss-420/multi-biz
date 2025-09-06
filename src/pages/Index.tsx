@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Building2, Users, Calendar, FileText, Sparkles, Zap, Globe, Shield } from "lucide-react";
+import { ScalingBusinessAnimation } from "@/components/ScalingBusinessAnimation";
 
 const Index = () => {
   const { user } = useAuth();
@@ -104,20 +105,14 @@ const Index = () => {
       {/* Hero Section */}
       <main className="relative z-10 container mx-auto px-4 py-16">
         <div className="text-center mb-16 animate-enter">
-          <div className="relative inline-block mb-6">
-            <h2 className="text-6xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent animate-pulse" style={{ animationDuration: '4s' }}>
-              Your Personal Business Empire
-            </h2>
-            <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-secondary/20 blur-2xl animate-pulse opacity-30" style={{ animationDuration: '3s' }} />
+          <div className="mb-8 animate-fade-in">
+            <div className="relative mb-8 h-32 flex items-center justify-center">
+              <ScalingBusinessAnimation />
+            </div>
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              Unite All Your Ventures. Amplify Your Success. Scale Without Limits.
+            </p>
           </div>
-          
-          <h3 className="text-6xl md:text-7xl font-bold bg-gradient-to-r from-secondary via-primary to-secondary bg-clip-text text-transparent mb-8 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            Command Center
-          </h3>
-          
-          <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '0.4s' }}>
-            Unite All Your Ventures. Amplify Your Success. Scale Without Limits.
-          </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: '0.6s' }}>
             <Link to="/auth">

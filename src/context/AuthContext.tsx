@@ -24,6 +24,7 @@ type AuthContextValue = {
   loading: boolean;
   login: (email: string, password: string) => Promise<{ error?: string }>;
   signup: (email: string, password: string, name?: string, phone?: string) => Promise<{ error?: string }>;
+  signInWithGoogle: () => Promise<{ error?: string }>;
   logout: () => Promise<void>;
   isOwner: boolean;
 };
@@ -109,7 +110,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signup = async (email: string, password: string, name?: string, phone?: string): Promise<{ error?: string }> => {
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = `${window.location.origin}/dashboard`;
       
       const { error } = await supabase.auth.signUp({
         email,
@@ -128,7 +129,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       toast.success("Please check your email to verify your account");
-      navigate("/auth");
+      return {};
+    } catch (error) {
+      return { error: "An unexpected error occurred" };
+    }
+  };
+
+  const signInWithGoogle = async (): Promise<{ error?: string }> => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+        }
+      });
+
+      if (error) {
+        return { error: error.message };
+      }
+
       return {};
     } catch (error) {
       return { error: "An unexpected error occurred" };
@@ -151,6 +170,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       loading,
       login,
       signup,
+      signInWithGoogle,
       logout,
       isOwner: profile?.role === "owner",
     }),
