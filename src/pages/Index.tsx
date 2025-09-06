@@ -156,6 +156,79 @@ const Index = () => {
           ))}
         </div>
 
+        {/* AI Features & Entrepreneurial Benefits */}
+        <div className="mb-16 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+          <div className="text-center mb-12">
+            <div className="flex items-center justify-center mb-4">
+              <Sparkles className="h-8 w-8 text-primary mr-3 animate-pulse" />
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                AI-Powered Business Intelligence
+              </h2>
+              <Sparkles className="h-8 w-8 text-primary ml-3 animate-pulse" />
+            </div>
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+              Leverage cutting-edge AI to streamline operations, generate insights, and accelerate your entrepreneurial journey.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              { 
+                icon: Zap, 
+                title: "Smart Task Generation", 
+                desc: "AI automatically generates actionable tasks from your business goals and objectives.",
+                gradient: "from-yellow-500/20 to-orange-500/20"
+              },
+              { 
+                icon: Sparkles, 
+                title: "Intelligent Summarization", 
+                desc: "Get AI-powered summaries of your tasks, progress, and next steps across all businesses.",
+                gradient: "from-purple-500/20 to-pink-500/20"
+              },
+              { 
+                icon: Shield, 
+                title: "Subscription Analytics", 
+                desc: "AI analyzes your subscriptions, identifies cost savings, and suggests optimizations.",
+                gradient: "from-blue-500/20 to-cyan-500/20"
+              },
+              { 
+                icon: Globe, 
+                title: "Strategic Insights", 
+                desc: "Receive AI-driven recommendations for scaling operations and expanding your empire.",
+                gradient: "from-green-500/20 to-emerald-500/20"
+              },
+              { 
+                icon: Building2, 
+                title: "Multi-Business Orchestration", 
+                desc: "AI helps coordinate tasks and resources across multiple business ventures seamlessly.",
+                gradient: "from-red-500/20 to-rose-500/20"
+              },
+              { 
+                icon: Users, 
+                title: "Team Optimization", 
+                desc: "Smart suggestions for task distribution and team collaboration based on workload analysis.",
+                gradient: "from-indigo-500/20 to-violet-500/20"
+              }
+            ].map(({ icon: Icon, title, desc, gradient }, index) => (
+              <div 
+                key={index}
+                className="group relative p-8 rounded-xl border bg-card/80 backdrop-blur-sm hover:bg-card transition-all duration-300 hover:shadow-2xl hover:shadow-primary/20 hover:-translate-y-2 animate-fade-in overflow-hidden"
+                style={{ animationDelay: `${0.1 * index}s` }}
+              >
+                <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                <div className="relative z-10">
+                  <div className="relative mb-6">
+                    <Icon className="h-12 w-12 text-primary group-hover:scale-110 transition-transform duration-300" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors duration-300">{title}</h3>
+                  <p className="text-muted-foreground leading-relaxed">{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Stats Section */}
         <div className="grid md:grid-cols-4 gap-8 mb-16 animate-fade-in" style={{ animationDelay: '0.8s' }}>
           {[
